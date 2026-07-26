@@ -2424,7 +2424,7 @@
   const CRITTERS=[
     {id:"ant",    name:"개미",     emoji:"🐜"},
     {id:"worm",   name:"지렁이",   emoji:"🪱"},
-    {id:"pillbug",name:"쥐며느리", emoji:"🪲"},
+    {id:"pillbug",name:"공벌레", emoji:"🪲"},
     {id:"cicada", name:"매미",     emoji:"🦋"},
     {id:"cricket",name:"귀뚜라미", emoji:"🦗"},
     {id:"spider", name:"거미",     emoji:"🕷️"},
@@ -10045,10 +10045,11 @@
     <li>카드는 모두 <b>뒷면(잎사귀)</b>으로 놓여 있어요.</li>
     <li>카드를 <b>두 장</b> 골라 뒤집어요. <b>같은 곤충</b>이면 짝! 그대로 열려 있어요 🎉</li>
     <li>다르면 다시 뒤집혀요. <b>어디에 무엇이 있었는지 기억</b>하세요!</li>
-    <li>모든 짝을 다 맞추면 클리어! <b>적은 뒤집기</b>와 <b>빠른 시간</b>이 목표예요.</li>
+    <li><b>1~4명</b>이 함께 할 수 있어요. 짝을 맞추면 <b>한 번 더</b>, 틀리면 <b>다음 사람</b> 차례! 짝을 가장 많이 모은 사람이 <b>승리</b>해요 🏆</li>
+    <li>혼자 할 때(1인)는 <b>적은 뒤집기</b>와 <b>빠른 시간</b>으로 최고 기록에 도전해요.</li>
     <li>난이도는 <b>카드 개수</b>로 정해요 — 쉬움 6장, 보통 12장, 어려움 20장.</li>
   </ul>
-  <p style="color:#777;font-size:13px;margin-top:8px">곤충 친구들: 애벌레·나비·매미·개구리·사슴벌레·사마귀·쥐며느리·전갈·잠자리·도마뱀 🐛🦋</p>
+  <p style="color:#777;font-size:13px;margin-top:8px">곤충 친구들: 애벌레·나비·매미·개구리·사슴벌레·사마귀·공벌레·전갈·잠자리·도마뱀 🐛🦋</p>
 </div></div>
 
 <div class="wrap">
@@ -10058,6 +10059,12 @@
       <button data-diff="easy">쉬움</button>
       <button data-diff="normal" class="on">보통</button>
       <button data-diff="hard">어려움</button>
+    </div>
+    <div class="seg" id="pSeg">
+      <button data-p="1" class="on">1인</button>
+      <button data-p="2">2인</button>
+      <button data-p="3">3인</button>
+      <button data-p="4">4인</button>
     </div>
   </div>
   <div class="status" id="status"></div>
@@ -10093,7 +10100,20 @@
 
   const MANTIS='<g><ellipse cx="58" cy="70" rx="10" ry="22" fill="#e8c93a" transform="rotate(12 58 70)"/><polygon points="30,26 46,20 44,36" fill="#ecd45a" stroke="#b89a1e" stroke-width="1.6"/><circle cx="33" cy="25" r="4" fill="#3a3210"/><circle cx="43" cy="24" r="4" fill="#3a3210"/><path d="M32 16 Q28 8 24 6 M40 15 Q44 7 48 6" stroke="#b89a1e" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M44 32 Q60 34 62 48" stroke="#d8bb2e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M40 40 Q20 40 22 26 Q30 30 46 34 Z" fill="#efd968" stroke="#b89a1e" stroke-width="1.6"/><path d="M42 44 Q22 48 26 34" stroke="#b89a1e" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M64 58 Q78 62 80 76 M62 74 Q74 82 76 90" stroke="#d8bb2e" stroke-width="3.4" fill="none" stroke-linecap="round"/></g>';
 
-  const PILL=RB+'<g><path d="M20 62 A30 30 0 0 1 80 62 Z" fill="url(#RBg)" stroke="#5a4a2e" stroke-width="2"/><path d="M32 62 A18 18 0 0 1 68 62" fill="none" stroke="#3a2f1c" stroke-width="1.8" opacity=".4"/><path d="M38 62 A12 12 0 0 1 62 62" fill="none" stroke="#3a2f1c" stroke-width="1.8" opacity=".4"/><path d="M26 62 A24 24 0 0 1 74 62" fill="none" stroke="#3a2f1c" stroke-width="1.8" opacity=".4"/><rect x="18" y="62" width="64" height="7" rx="3" fill="#6b5836"/><circle cx="30" cy="52" r="3" fill="#1c150a"/><path d="M18 60 Q10 56 8 50 M82 60 Q90 56 92 50" stroke="#6b5836" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>';
+  // 공벌레(쥐며느리): segmented roly-poly, rainbow armor bands, side legs, short antennae
+  const PILL='<g>'
+    +'<path d="M32 46 L20 40 M30 55 L17 53 M30 64 L18 67 M33 72 L23 78" stroke="#5a4a2e" stroke-width="2.6" stroke-linecap="round"/>'
+    +'<path d="M68 46 L80 40 M70 55 L83 53 M70 64 L82 67 M67 72 L77 78" stroke="#5a4a2e" stroke-width="2.6" stroke-linecap="round"/>'
+    +'<ellipse cx="50" cy="79" rx="13" ry="8.5" fill="#9457c9" stroke="#5a4a2e" stroke-width="1.6"/>'
+    +'<ellipse cx="50" cy="70" rx="19" ry="7.5" fill="#4a90d9" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="61" rx="23" ry="7.5" fill="#57c84d" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="52" rx="24" ry="7.5" fill="#f1cf3b" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="43" rx="22" ry="7.5" fill="#ef8f39" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="35" rx="18" ry="7.5" fill="#e5544b" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="27" rx="13" ry="8" fill="#c99a5e" stroke="#5a4a2e" stroke-width="1.6"/>'
+    +'<path d="M43 21 Q38 14 33 12 M57 21 Q62 14 67 12" stroke="#8a6a3e" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+    +'<circle cx="45" cy="27" r="2.3" fill="#241a0c"/><circle cx="55" cy="27" r="2.3" fill="#241a0c"/>'
+    +'</g>';
 
   const SCORP='<g><ellipse cx="46" cy="60" rx="15" ry="12" fill="#9457c9"/><ellipse cx="34" cy="52" rx="9" ry="7" fill="#a76fd4"/><path d="M26 50 Q14 44 12 52 Q12 58 22 56 M26 54 Q16 58 18 64" stroke="#7a3fae" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M22 44 L10 40 M20 48 L8 50" stroke="#7a3fae" stroke-width="3" stroke-linecap="round"/><path d="M58 64 Q76 66 80 50 Q82 38 70 34" fill="none" stroke="#9457c9" stroke-width="8" stroke-linecap="round"/><circle cx="69" cy="31" r="6" fill="#b57ee0"/><path d="M69 26 L72 20" stroke="#7a3fae" stroke-width="3.4" stroke-linecap="round"/><path d="M40 70 L34 80 M48 72 L46 84 M54 70 L60 80" stroke="#7a3fae" stroke-width="3" stroke-linecap="round"/><circle cx="41" cy="56" r="2.4" fill="#2a123a"/><circle cx="50" cy="56" r="2.4" fill="#2a123a"/></g>';
 
@@ -10108,7 +10128,7 @@
     I('frog','개구리','#57c84d',FROG),
     I('stag','사슴벌레','#ec6b9d',STAG),
     I('mantis','사마귀','#e8c93a',MANTIS),
-    I('pill','쥐며느리','#a97fd0',PILL),
+    I('pill','공벌레','#b98a55',PILL),
     I('scorp','전갈','#9457c9',SCORP),
     I('dfly','잠자리','#ef8f39',DFLY),
     I('lizard','도마뱀','#5fc6e8',LIZARD)
@@ -10118,8 +10138,13 @@
   const DIFF={ easy:{pairs:3,cols:3}, normal:{pairs:6,cols:4}, hard:{pairs:10,cols:5} };
   const DIFFNAME={easy:"쉬움",normal:"보통",hard:"어려움"};
   let curDiff="normal";
-  const DIFF_KEY="memory_diff", BEST_KEY="memory_best";
+  const DIFF_KEY="memory_diff", BEST_KEY="memory_best", PLAYERS_KEY="memory_players";
   let best={easy:null,normal:null,hard:null}; // {flips,secs}
+
+  // ---- players (1~4) ----
+  let players=1, cur=0, scores=[0];
+  const PCOL=["#4a90d9","#ef8f39","#57c84d","#9457c9"];
+  const PNAME=["1P","2P","3P","4P"];
 
   // ---- state ----
   let cards=[];        // {id, matched, up}
@@ -10133,10 +10158,12 @@
   function loadPrefs(){
     try{ var d=localStorage.getItem(DIFF_KEY); if(d&&DIFF[d]) curDiff=d; }catch(e){}
     try{ var b=JSON.parse(localStorage.getItem(BEST_KEY)||"null"); if(b) best=Object.assign(best,b); }catch(e){}
+    try{ var p=+localStorage.getItem(PLAYERS_KEY); if(p>=1&&p<=4) players=p; }catch(e){}
   }
   function savePrefs(){
     try{ localStorage.setItem(DIFF_KEY,curDiff); }catch(e){}
     try{ localStorage.setItem(BEST_KEY,JSON.stringify(best)); }catch(e){}
+    try{ localStorage.setItem(PLAYERS_KEY,players); }catch(e){}
   }
   function setMsg(t,k){ msgEl.innerHTML=t; msgEl.className="message"+(k?(" "+k):""); }
   function buzz(p){ try{ window.__buzz&&window.__buzz(p); }catch(e){} }
@@ -10146,6 +10173,7 @@
 
   function newGame(){
     stopTimer(); gameOver=false; first=-1; lock=false; flips=0; matched=0; elapsed=0; startAt=0;
+    cur=0; scores=new Array(players).fill(0);
     overlay.classList.remove("show");
     const cfg=DIFF[curDiff];
     const pick=shuffle(INSECTS.slice()).slice(0,cfg.pairs);
@@ -10154,7 +10182,7 @@
     cards=deck.map(id=>({id,matched:false,up:false}));
     render(true);
     updateStatus();
-    setMsg("카드를 뒤집어 같은 곤충을 찾아요! 🔎","good");
+    setMsg(players>1 ? (PNAME[0]+" 차례! 카드를 두 장 뒤집어요 🔎") : "카드를 뒤집어 같은 곤충을 찾아요! 🔎","good");
   }
 
   function sizeBoard(){
@@ -10196,11 +10224,23 @@
 
   function updateStatus(){
     const cfg=DIFF[curDiff];
-    const b=best[curDiff];
-    statusEl.innerHTML='<span class="chip">🔄 <b>'+flips+'</b> 뒤집기</span>'
-      +'<span class="chip">⏱️ <b id="tm">'+fmt(elapsed)+'</b></span>'
-      +'<span class="chip">🃏 <b>'+matched+'</b>/'+cfg.pairs+'</span>'
-      +(b?'<span class="chip best">🏅 '+b.flips+'회·'+fmt(b.secs)+'</span>':'');
+    if(players<=1){
+      const b=best[curDiff];
+      statusEl.innerHTML='<span class="chip">🔄 <b>'+flips+'</b> 뒤집기</span>'
+        +'<span class="chip">⏱️ <b id="tm">'+fmt(elapsed)+'</b></span>'
+        +'<span class="chip">🃏 <b>'+matched+'</b>/'+cfg.pairs+'</span>'
+        +(b?'<span class="chip best">🏅 '+b.flips+'회·'+fmt(b.secs)+'</span>':'');
+    } else {
+      let h='';
+      for(let i=0;i<players;i++){
+        const on=i===cur && !gameOver;
+        h+='<span class="chip" style="border-color:'+PCOL[i]+';'
+          +(on?('background:'+PCOL[i]+';color:#fff;box-shadow:0 0 0 3px '+PCOL[i]+'44;'):'')
+          +'"><b>'+PNAME[i]+'</b> '+scores[i]+'짝</span>';
+      }
+      h+='<span class="chip">🃏 <b>'+matched+'</b>/'+cfg.pairs+'</span>';
+      statusEl.innerHTML=h;
+    }
   }
   function tick(){ elapsed=((Date.now()-startAt)/1000)|0; const t=document.getElementById("tm"); if(t) t.textContent=fmt(elapsed); }
   function startTimer(){ if(timerId) return; startAt=Date.now(); timerId=setInterval(tick,500); }
@@ -10210,28 +10250,31 @@
     if(lock||gameOver) return;
     const c=cards[idx];
     if(c.matched||c.up) return;
-    if(!startAt) startTimer();
+    if(players<=1 && !startAt) startTimer();
     c.up=true; buzz(10); render(false);
     if(first<0){ first=idx; return; }
     // second card
-    flips++; updateStatus();
+    flips++;
     const a=cards[first], b=cards[idx];
     if(a.id===b.id){
       a.matched=b.matched=true; matched++;
+      if(players>1) scores[cur]++;
       first=-1;
       buzz([18,30,20]);
       render(false); updateStatus();
-      setMsg("짝 맞았어요! 🎉 ("+BYID[a.id].name+")","good");
+      setMsg(players>1 ? ("짝! 🎉 "+BYID[a.id].name+" — "+PNAME[cur]+" 한 번 더!") : ("짝 맞았어요! 🎉 ("+BYID[a.id].name+")"),"good");
       if(matched===DIFF[curDiff].pairs) finish();
     } else {
-      lock=true;
-      setMsg("다른 곤충이에요. 위치를 기억해요! 🧐","warn");
+      lock=true; updateStatus();
+      setMsg(players>1 ? "다른 곤충이에요! 다음 차례로 넘어가요 🧐" : "다른 곤충이에요. 위치를 기억해요! 🧐","warn");
       const fi=first; first=-1;
       setTimeout(()=>{
         cards[fi].up=false; cards[idx].up=false;
         const e1=boardEl.children[fi], e2=boardEl.children[idx];
         if(e1) e1.classList.add("shake"); if(e2) e2.classList.add("shake");
-        render(false);
+        if(players>1) cur=(cur+1)%players;
+        render(false); updateStatus();
+        if(players>1) setMsg(PNAME[cur]+" 차례예요! 🔎","good");
         setTimeout(()=>{ if(e1)e1.classList.remove("shake"); if(e2)e2.classList.remove("shake"); },400);
         lock=false;
       },780);
@@ -10240,14 +10283,22 @@
 
   function finish(){
     gameOver=true; stopTimer();
-    const secs=elapsed;
-    let rec="";
-    const b=best[curDiff];
-    const better = !b || flips<b.flips || (flips===b.flips && secs<b.secs);
-    if(better){ best[curDiff]={flips,secs}; savePrefs(); rec="🏅 최고 기록 갱신! "; }
-    updateStatus();
-    document.getElementById("mTitle").textContent="클리어! 🎉 ("+DIFFNAME[curDiff]+")";
-    document.getElementById("mText").innerHTML=rec+"👏 <b>"+flips+"</b>번 만에, <b>"+fmt(secs)+"</b> 안에 모두 찾았어요!";
+    if(players<=1){
+      const secs=elapsed;
+      let rec="";
+      const b=best[curDiff];
+      const better = !b || flips<b.flips || (flips===b.flips && secs<b.secs);
+      if(better){ best[curDiff]={flips,secs}; savePrefs(); rec="🏅 최고 기록 갱신! "; }
+      updateStatus();
+      document.getElementById("mTitle").textContent="클리어! 🎉 ("+DIFFNAME[curDiff]+")";
+      document.getElementById("mText").innerHTML=rec+"👏 <b>"+flips+"</b>번 만에, <b>"+fmt(secs)+"</b> 안에 모두 찾았어요!";
+    } else {
+      updateStatus();
+      const max=Math.max.apply(null,scores);
+      const winners=[]; scores.forEach((s,i)=>{ if(s===max) winners.push(i); });
+      document.getElementById("mTitle").textContent = winners.length===1 ? (PNAME[winners[0]]+" 승리! 🎉") : "공동 우승! 🤝";
+      document.getElementById("mText").innerHTML = scores.map((s,i)=>PNAME[i]+" <b>"+s+"</b>짝").join(" · ");
+    }
     setTimeout(()=>overlay.classList.add("show"),420);
   }
 
@@ -10255,8 +10306,13 @@
     document.querySelectorAll("#diffSeg button").forEach(b=>b.classList.toggle("on",b.dataset.diff===d));
     newGame();
   }
+  function setPlayers(n){ n=+n; if(!(n>=1&&n<=4)) return; players=n; savePrefs();
+    document.querySelectorAll("#pSeg button").forEach(b=>b.classList.toggle("on",+b.dataset.p===n));
+    newGame();
+  }
 
   document.querySelectorAll("#diffSeg button").forEach(b=>b.addEventListener("click",()=>setDiff(b.dataset.diff)));
+  document.querySelectorAll("#pSeg button").forEach(b=>b.addEventListener("click",()=>setPlayers(b.dataset.p)));
   document.getElementById("newBtn").addEventListener("click",newGame);
   document.getElementById("mBtn").addEventListener("click",newGame);
   overlay.addEventListener("click",e=>{ if(e.target===overlay) overlay.classList.remove("show"); });
@@ -10266,6 +10322,7 @@
 
   loadPrefs();
   document.querySelectorAll("#diffSeg button").forEach(b=>b.classList.toggle("on",b.dataset.diff===curDiff));
+  document.querySelectorAll("#pSeg button").forEach(b=>b.classList.toggle("on",+b.dataset.p===players));
   newGame();
   window.addEventListener("resize", sizeBoard);
   window.addEventListener("orientationchange", ()=>setTimeout(sizeBoard,80));
