@@ -9811,7 +9811,7 @@
     if(isWall(tr,tc)){ setMsg("벽이라 못 가요.","warn"); return; }
     if(isBox(tr,tc)){
       const br=tr+dy,bc=tc+dx;
-      if(isWall(br,bc)||isBox(br,bc)){ setMsg("상자를 더 밀 수 없어요.","warn"); return; }
+      if(isWall(br,bc)||isBox(br,bc)){ setMsg("먹이를 더 밀 수 없어요.","warn"); return; }
       snapshot();
       const __k1=key(tr,tc),__k2=key(br,bc),__t=boxType.get(__k1);
       boxes.delete(__k1); boxes.add(__k2); boxType.delete(__k1); boxType.set(__k2,__t);
@@ -9821,6 +9821,7 @@
     } else {
       snapshot();
       pr=tr; pc=tc; moves++; histDirs.push(di);
+      __buzz&&__buzz(10);
       render();
     }
   }
@@ -9830,19 +9831,26 @@
     if((r===pr)!==(c===pc)) glideTo(r,c);   // walk along a clear row/column
   }
   function glideTo(r,c){
-    if(isWall(r,c)||isBox(r,c)){ setMsg("거긴 갈 수 없어요.","warn"); return; }
     const dr=Math.sign(r-pr), dc=Math.sign(c-pc);
-    let cr=pr, cc=pc, steps=[];
-    while(cr!==r||cc!==c){
-      const nr=cr+dr, nc=cc+dc;
-      if(isWall(nr,nc)||isBox(nr,nc)){ setMsg("길이 막혀서 못 가요.","warn"); return; }
-      cr=nr; cc=nc; steps.push(dr!==0?(dr>0?0:1):(dc>0?2:3));
-    }
+    const di = dr!==0 ? (dr>0?0:1) : (dc>0?2:3);
     snapshot();
-    // record each step so hint/solution tracking stays consistent
-    for(const s of steps){ histDirs.push(s); }
-    pr=r; pc=c; moves+=steps.length;
-    render(); setMsg("스르륵~ 이동!","good");
+    let cr=pr, cc=pc, moved=0, pushed=false;
+    while(cr!==r || cc!==c){
+      const nr=cr+dr, nc=cc+dc;                 // 다음 칸
+      if(isWall(nr,nc)) break;                  // 벽 → 그 앞에서 멈춤
+      if(isBox(nr,nc)){
+        const br=nr+dr, bc=nc+dc;               // 먹이 너머 칸
+        if(isWall(br,bc)||isBox(br,bc)) break;  // 벽이거나 또 다른 먹이 → 그 앞에서 멈춤
+        const k1=key(nr,nc),k2=key(br,bc),t=boxType.get(k1);   // 먹이 1개 밀기
+        boxes.delete(k1); boxes.add(k2); boxType.delete(k1); boxType.set(k2,t);
+        pushed=true;
+      }
+      cr=nr; cc=nc; pr=cr; pc=cc; moves++; histDirs.push(di); moved++;
+    }
+    if(moved===0){ hist.pop(); setMsg("그쪽으로 갈 수 없어요.","warn"); return; }
+    __buzz&&__buzz(pushed?15:10);
+    render(); check();
+    setMsg(pushed?"먹이를 밀며 이동!":"스르륵~ 이동!","good");
   }
 
   function check(){
