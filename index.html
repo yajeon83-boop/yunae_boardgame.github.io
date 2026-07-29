@@ -11339,6 +11339,8 @@
   .sticker{position:absolute;display:flex;align-items:center;justify-content:center;cursor:grab;line-height:1;transform-origin:center center;will-change:left,top,transform;}
   .sticker svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
   .sticker.sel{outline:3px dashed #ff8a3d;outline-offset:3px;border-radius:10px;}
+  .sticker .rz{position:absolute;right:-8px;bottom:-8px;width:28px;height:28px;border-radius:9px;background:#fff;border:2px solid #7bb45a;color:#3a7a2e;display:none;align-items:center;justify-content:center;font-size:16px;font-weight:900;cursor:nwse-resize;box-shadow:0 2px 6px rgba(0,0,0,.28);z-index:6;touch-action:none;}
+  .sticker.sel .rz{display:flex;}
   .sticker.pop{animation:pop .28s cubic-bezier(.34,1.56,.64,1);}
   @keyframes pop{0%{transform:scale(.2) rotate(var(--rot,0deg)) scaleX(var(--fx,1));}100%{}}
   .selbar{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:none;flex-direction:column;align-items:center;gap:5px;z-index:99999;background:rgba(255,255,255,.94);border-radius:14px;padding:6px 8px;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:96%;}
@@ -11440,12 +11442,19 @@
   const GHLEG='<g><circle cx="26" cy="76" r="6" fill="#6a8a2a" stroke="#4a6a1a" stroke-width="1.6"/><path d="M26 76 L46 46" stroke="#8ab23a" stroke-width="10" stroke-linecap="round"/><path d="M46 46 L74 30" stroke="#a7c74f" stroke-width="6.5" stroke-linecap="round"/><path d="M74 30 L88 25" stroke="#7a9a2e" stroke-width="3.6" stroke-linecap="round"/><path d="M54 42 l3 -5 M62 38 l3 -5 M70 34 l3 -5" stroke="#5a7a1e" stroke-width="2.6" stroke-linecap="round"/></g>';
   const LEAFBIT='<g><path d="M28 72 Q18 42 50 20 Q82 42 72 72 Q64 80 56 74 A9 9 0 0 1 40 74 Q34 80 28 72 Z" fill="#6fbf4a" stroke="#3f8a2a" stroke-width="2.4" stroke-linejoin="round"/><path d="M50 24 L50 74" stroke="#3f8a2a" stroke-width="2.2"/><path d="M50 40 L36 47 M50 52 L64 59 M50 46 L64 40 M50 58 L38 64" stroke="#3f8a2a" stroke-width="1.6"/></g>';
   const GRUB='<g><path d="M40 26 Q70 22 74 46 Q78 70 54 78 Q34 84 30 66 Q28 54 40 52 Q34 44 40 26 Z" fill="#f4edd6" stroke="#cbb98e" stroke-width="2.2"/><path d="M44 32 Q60 30 64 44 M40 46 Q58 44 66 54 M38 58 Q54 58 62 66" stroke="#dccca2" stroke-width="2.4" fill="none"/><circle cx="42" cy="30" r="7.5" fill="#b5824a"/><circle cx="39" cy="29" r="1.8" fill="#3a2410"/><circle cx="45" cy="29" r="1.8" fill="#3a2410"/></g>';
+  const DIVINGBEETLE='<g><ellipse cx="50" cy="55" rx="26" ry="32" fill="#3a6a2e" stroke="#22401a" stroke-width="2.4"/><ellipse cx="50" cy="53" rx="20" ry="27" fill="#4f8a3a"/><path d="M50 27 L50 85" stroke="#22401a" stroke-width="2" opacity=".55"/><ellipse cx="50" cy="25" rx="10" ry="8" fill="#2e5624"/><circle cx="45" cy="24" r="2.2" fill="#12240c"/><circle cx="55" cy="24" r="2.2" fill="#12240c"/><path d="M40 35 Q46 41 40 47 M60 35 Q54 41 60 47" stroke="#dfe9c0" stroke-width="2" fill="none" opacity=".5"/><path d="M26 45 L12 41 M28 59 L14 61 M28 71 L16 79 M74 45 L88 41 M72 59 L86 61 M72 71 L84 79" stroke="#22401a" stroke-width="3" stroke-linecap="round"/></g>';
+  const WATERSTRIDER='<g><ellipse cx="50" cy="50" rx="6" ry="20" fill="#4a3a26" stroke="#2a1f12" stroke-width="1.6"/><circle cx="50" cy="30" r="5.5" fill="#5a4632"/><circle cx="48" cy="29" r="1.5" fill="#120c06"/><circle cx="52" cy="29" r="1.5" fill="#120c06"/><path d="M46 40 Q20 30 8 40 M54 40 Q80 30 92 40 M46 56 Q22 66 10 82 M54 56 Q78 66 90 82" stroke="#3a2f1e" stroke-width="2.4" fill="none" stroke-linecap="round"/><ellipse cx="8" cy="41" rx="3.5" ry="1.6" fill="#bfe0f0" opacity=".7"/><ellipse cx="92" cy="41" rx="3.5" ry="1.6" fill="#bfe0f0" opacity=".7"/><ellipse cx="10" cy="83" rx="3.5" ry="1.6" fill="#bfe0f0" opacity=".7"/><ellipse cx="90" cy="83" rx="3.5" ry="1.6" fill="#bfe0f0" opacity=".7"/></g>';
+  const PONDSNAIL='<g><path d="M30 82 Q52 92 70 82" stroke="#c9a86a" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M34 80 Q18 78 20 62 Q22 44 46 44 Q68 44 68 62 Q68 78 50 78 Q38 78 40 66 Q42 56 52 58 Q59 60 58 66" fill="none" stroke="#8a6a3e" stroke-width="7" stroke-linecap="round"/><circle cx="70" cy="80" r="3" fill="#5a4326"/><path d="M72 78 Q78 70 76 64 M74 80 Q82 76 84 70" stroke="#8a6a3e" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>';
+  const PIRANHA='<g><path d="M22 50 Q32 30 56 32 Q80 34 86 50 Q80 66 56 68 Q32 70 22 50 Z" fill="#9aa6ad" stroke="#5c666c" stroke-width="2.2"/><path d="M56 40 Q78 43 82 50 Q78 57 56 60 Z" fill="#e0863a"/><path d="M22 50 L6 40 L11 50 L6 60 Z" fill="#8a969c" stroke="#5c666c" stroke-width="1.6"/><path d="M38 63 l4 5 l4 -5 l4 5 l4 -5" stroke="#fff" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="70" cy="44" r="4.5" fill="#fff"/><circle cx="70.5" cy="44" r="2.4" fill="#1a1a1a"/></g>';
+  const MORAY='<g><path d="M28 88 Q8 78 18 56 Q28 38 48 40 Q68 42 70 26 Q71 15 61 13 Q66 21 57 29 Q47 37 38 35" fill="none" stroke="#5a8a3a" stroke-width="12" stroke-linecap="round"/><ellipse cx="61" cy="20" rx="10" ry="8" fill="#6aa048"/><circle cx="64" cy="17" r="2.2" fill="#16240c"/><path d="M52 24 Q61 28 69 23" stroke="#2a4018" stroke-width="2" fill="none"/><path d="M53 24 l2 3 M58 26 l1 3 M64 25 l1 3" stroke="#fff" stroke-width="1.3"/></g>';
   const E=v=>({t:'e',v}); const S=v=>({t:'s',v:SV(v)});
   // ===== 스티커 세트 (배경과 무관, 어디서든 사용) =====
   const CATS={
     '🌴정글':[S(NABI),S(CATER),S(DFLY),S(STAG),S(MANTIS),S(LONGHORN_PLACEHOLDER()),S(PILL),S(SCORP),S(FROG),S(CICADA),S(LIZARD),S(HONEYPOT),S(HIVE),
               E('🐊'),E('🦗'),E('🦋'),E('🐛'),E('🪰'),E('🦟'),E('🐝'),E('🪲'),E('🐞'),E('🪳'),E('🕷️'),E('🕸️'),E('🐌'),E('🐍'),E('🦜'),E('🐒'),E('🦎'),E('🍯')],
-    '🌊바다':[S(CLOWNFISH),S(STONEFISH),S(STARFISH),S(RAY),S(SEAHORSE),S(WHALE),E('🐋'),E('🐳'),E('🐬'),E('🦭'),E('🐟'),E('🐠'),E('🐡'),E('🦈'),E('🐢'),E('🪼'),E('🐙'),E('🦑'),E('🦐'),E('🦞'),E('🦀'),E('🐚'),E('🦪'),E('🐌'),E('⭐'),E('🪸'),E('🌊')],
+    '🌊바다':[S(CLOWNFISH),S(STONEFISH),S(STARFISH),S(RAY),S(SEAHORSE),S(WHALE),S(MORAY),E('🐋'),E('🐳'),E('🐬'),E('🦭'),E('🐟'),E('🐠'),E('🐡'),E('🦈'),E('🐢'),E('🪼'),E('🐙'),E('🦑'),E('🦐'),E('🦞'),E('🦀'),E('🐚'),E('🦪'),E('🐌'),E('⭐'),E('🪸'),E('🌊')],
+    '🏞️강':[S(DFLY),S(DIVINGBEETLE),S(WATERSTRIDER),S(PONDSNAIL),S(PIRANHA),S(SCORP),S(FROG),
+             E('🐊'),E('🦦'),E('🦆'),E('🦢'),E('🦀'),E('🐟'),E('🐡'),E('🐢'),E('🐌'),E('🐚'),E('🦪'),E('🪱'),E('🐛'),E('🪲'),E('🦟'),E('🪵'),E('🪨'),E('🌿'),E('🪴'),E('💧'),E('🫧')],
     '☁️하늘':[S(NABI),S(DFLY),E('🦋'),E('🐝'),E('🐞'),E('🦅'),E('🦉'),E('🦜'),E('🦢'),E('🦩'),E('🕊️'),E('🐦'),E('🐤'),E('🦇'),E('☁️'),E('🌈'),E('⭐'),E('🌙'),E('☀️'),E('🪁')],
     '⛰️땅속':[S(ANTNEST),S(CHAMBER),S(TUNNEL),S(GHLEG),S(LEAFBIT),S(GRUB),S(CATER),S(PILL),
               E('🐜'),E('🪱'),E('🐛'),E('🪲'),E('🦗'),E('🕷️'),E('🐭'),E('🐍'),E('🦔'),E('🕳️'),
@@ -11545,6 +11554,9 @@
     el.innerHTML=innerHTMLfor(st); el.__st=st; st.__el=el; el.style.zIndex=st.z||(++zTop);
     if(st.t==='s') markEyes(el);
     applyColor(st);
+    const rz=document.createElement('div'); rz.className='rz'; rz.textContent='⤡';
+    rz.addEventListener('pointerdown',ev=>startResize(ev,st));
+    el.appendChild(rz);
     el.addEventListener('pointerdown',onStickerDown); return el;
   }
   function positionNode(st){ const rect=stage.getBoundingClientRect(); const size=st.size; const el=st.__el;
@@ -11596,6 +11608,16 @@
     drag.st.fx=Math.max(0.02,Math.min(0.98,(e.clientX-rect.left-drag.dx)/rect.width));
     drag.st.fy=Math.max(0.02,Math.min(0.98,(e.clientY-rect.top-drag.dy)/rect.height)); positionNode(drag.st); });
   window.addEventListener('pointerup',()=>{ if(drag){ drag.st.__el.style.cursor='grab'; save(); drag=null; } });
+
+  // ---- 모서리 핸들로 직접 확대/축소 ----
+  let resz=null;
+  function startResize(e,st){ e.stopPropagation(); e.preventDefault(); select(st); st.z=++zTop; st.__el.style.zIndex=st.z;
+    const rect=stage.getBoundingClientRect(); resz={st, cx:rect.left+st.fx*rect.width, cy:rect.top+st.fy*rect.height};
+    try{ e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId); }catch(_){}
+  }
+  window.addEventListener('pointermove',e=>{ if(!resz) return; const dx=e.clientX-resz.cx, dy=e.clientY-resz.cy;
+    let ns=2*Math.hypot(dx,dy)/1.414; ns=Math.max(36,Math.min(260,ns)); resz.st.size=ns; positionNode(resz.st); });
+  window.addEventListener('pointerup',()=>{ if(resz){ save(); resz=null; } });
   let sw=null;
   stage.addEventListener('pointerdown',e=>{ const empty=(e.target===stage||e.target.classList.contains('layer')||e.target.parentElement===bgLayer);
     if(empty){ deselect(); if(!animating) sw={x0:e.clientX,y0:e.clientY,dx:0,dy:0}; } });
