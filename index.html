@@ -318,6 +318,14 @@
           </div>
           <div class="cgo">놀러가기 →</div>
         </button>
+        <button class="game-card maze" data-game="maze" aria-label="곤충 미로찾기 열기">
+          <div class="ic">🌀</div>
+          <div class="ct">
+            <div class="cname">곤충 미로찾기</div>
+            <div class="cdesc">랜덤 곤충 친구가 미로를 탈출! <b>스와이프</b>로 갈림길까지 쭉 이동해 🏁까지 가요. 난이도 쉬움·보통·어려움·매우 어려움. <span class="orig">오리지널 창작</span></div>
+          </div>
+          <div class="cgo">놀러가기 →</div>
+        </button>
         <button class="game-card kahuna" data-game="kahuna" aria-label="곤충 카후나 열기">
           <div class="ic">🌸</div>
           <div class="ct">
@@ -10726,6 +10734,533 @@
 </body>
 </html>
   </template>
+  <template id="tpl-maze"><!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>곤충 미로찾기</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+    background:linear-gradient(160deg,#eaf6e6,#ddeecf 60%,#cfe6d6);color:#2c3a24;
+    display:flex;flex-direction:column;min-height:100%;overflow:hidden;user-select:none;-webkit-user-select:none;}
+  header{padding:10px 14px 4px;text-align:center;}
+  header h1{margin:0;font-size:20px;letter-spacing:.5px;color:#3a5a2a;}
+  .friend{margin:5px auto 0;display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid #cfe0be;
+    border-radius:999px;padding:3px 14px 3px 5px;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+  .friend .fico{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;}
+  .friend .fico svg{width:100%;height:100%;}
+  .friend b{font-size:15px;color:#3a5a2a;}
+  .friend small{font-size:12px;color:#8aa07a;}
+  .seg{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 10px 2px;}
+  .seg button{border:2px solid #bcd3a6;background:#fff;color:#5a7a44;border-radius:999px;
+    padding:6px 13px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;}
+  .seg button.on{background:#7bb45a;border-color:#5f9a3f;color:#fff;box-shadow:0 2px 8px rgba(110,160,70,.4);}
+  .bar{display:flex;justify-content:center;align-items:center;gap:12px;margin:8px 10px 4px;font-size:13px;color:#5a6a48;flex-wrap:wrap;}
+  .bar .chip{background:#fff;border:1.5px solid #d6e4c6;border-radius:10px;padding:3px 10px;font-weight:700;}
+  .bar .chip b{color:#3a5a2a;}
+  .bar button{border:2px solid #bcd3a6;background:#fff;color:#5a7a44;border-radius:10px;padding:4px 12px;font-weight:800;cursor:pointer;font-size:13px;}
+  .bar button:active{transform:scale(.96);}
+  .mid{flex:1;position:relative;overflow:hidden;min-height:0;margin:6px 10px 4px;touch-action:none;}
+  .board{position:absolute;left:0;top:0;transform-origin:0 0;background:transparent;touch-action:none;}
+  .cellgrid{position:absolute;inset:0;display:grid;}
+  .cell{position:relative;}
+  .cell.in{background:#f6ecd6;}
+  .cell.in.tr{background:#f6ecd6;}
+  .trail{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible;}
+  .cell.in.wn{border-top:var(--wall);}
+  .cell.in.we{border-right:var(--wall);}
+  .cell.in.ws{border-bottom:var(--wall);}
+  .cell.in.ww{border-left:var(--wall);}
+  .goal{position:absolute;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none;}
+  .goal .halo{position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle,#ffe9a8,#ffd05e 60%,rgba(255,208,94,0));
+    animation:pulse 1.3s ease-in-out infinite;}
+  .goal .flag{position:relative;}
+  @keyframes pulse{0%,100%{transform:scale(.82);opacity:.65;}50%{transform:scale(1.08);opacity:1;}}
+  .start{position:absolute;z-index:1;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+  .start i{display:block;width:34%;height:34%;border-radius:50%;background:#8fd27a;opacity:.7;}
+  .player{position:absolute;z-index:5;display:flex;align-items:center;justify-content:center;pointer-events:none;
+    transition:left .09s linear,top .09s linear;will-change:left,top;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));}
+  .player svg{width:100%;height:100%;}
+  .hint{text-align:center;font-size:12.5px;color:#7a8a68;margin:2px 10px 8px;min-height:16px;}
+  .win{position:fixed;inset:0;background:rgba(30,45,20,.55);display:none;align-items:center;justify-content:center;z-index:40;}
+  .win.show{display:flex;}
+  .wincard{background:#fff;border-radius:18px;padding:22px 26px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);max-width:82%;}
+  .wincard h2{margin:0 0 6px;color:#3a7a2a;font-size:22px;}
+  .wincard p{margin:4px 0;color:#5a6a48;font-size:14px;}
+  .wincard .big{width:92px;height:92px;margin:4px auto 8px;}
+  .wincard .big svg{width:100%;height:100%;}
+  .wincard button{margin-top:12px;border:none;background:#7bb45a;color:#fff;font-weight:800;font-size:15px;
+    border-radius:12px;padding:10px 22px;cursor:pointer;box-shadow:0 3px 10px rgba(110,160,70,.5);}
+  .confettiWrap{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:35;}
+  .confetti{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:cf linear forwards;}
+  .star{position:absolute;top:-16px;font-size:18px;animation:cf linear forwards;}
+  @keyframes cf{to{transform:translateY(115vh) rotate(720deg);opacity:.9;}}
+</style></head>
+<body>
+  <header>
+    <h1>🌀 곤충 미로찾기</h1>
+    <div class="friend"><span class="fico" id="fico"></span><span><b id="fname">곤충</b> <small>가 길을 찾아요!</small></span></div>
+  </header>
+  <div class="seg" id="diffSeg">
+    <button data-d="easy" class="on">쉬움</button>
+    <button data-d="normal">보통</button>
+    <button data-d="hard">어려움</button>
+    <button data-d="expert">매우 어려움</button>
+  </div>
+  <div class="bar">
+    <span class="chip">⏱ <b id="time">0.0s</b></span>
+    <span class="chip">👣 <b id="moves">0</b></span>
+    <span class="chip">🏅 <b id="best">-</b></span>
+    <button id="newBtn">🔄 새 미로</button>
+    <button id="zoomOut" aria-label="축소">➖</button>
+    <button id="zoomIn" aria-label="확대">🔍➕</button>
+  </div>
+  <div class="mid">
+    <div class="board" id="board">
+      <div class="cellgrid" id="grid"></div>
+      <svg class="trail" id="trail"></svg>
+      <div class="start" id="startM"><i></i></div>
+      <div class="goal" id="goal"><span class="halo"></span><span class="flag">🏁</span></div>
+      <div class="player" id="player"></div>
+    </div>
+  </div>
+  <div class="hint" id="hint">곤충을 <b>손가락으로 쓸어서</b> 길을 따라 데려가요. 🏁까지 도착하면 성공!</div>
+  <div class="win" id="win">
+    <div class="wincard">
+      <h2>🎉 탈출 성공!</h2>
+      <div class="big" id="winIco"></div>
+      <p id="winStats"></p>
+      <p id="winBest" style="color:#c98a1e;font-weight:700"></p>
+      <button id="againBtn">다음 미로 →</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  // ================= 곤충 아트 (곤충 메모리 게임과 동일한 오리지널 SVG) =================
+  const RB='<defs><linearGradient id="RBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5544b"/><stop offset=".25" stop-color="#ef8f39"/><stop offset=".45" stop-color="#f1cf3b"/><stop offset=".65" stop-color="#57c84d"/><stop offset=".82" stop-color="#4a90d9"/><stop offset="1" stop-color="#9457c9"/></linearGradient></defs>';
+  const RBV='<defs><linearGradient id="RBv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5544b"/><stop offset=".2" stop-color="#ef8f39"/><stop offset=".4" stop-color="#f1cf3b"/><stop offset=".6" stop-color="#57c84d"/><stop offset=".8" stop-color="#4a90d9"/><stop offset="1" stop-color="#9457c9"/></linearGradient></defs>';
+  function I(id,name,color,svg){ return {id,name,color,svg:'<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'+svg+'</svg>'}; }
+  const CATER='<g><ellipse cx="18" cy="60" rx="11" ry="11" fill="#39c690"/><ellipse cx="33" cy="62" rx="12.5" ry="12.5" fill="#59dca6"/><ellipse cx="50" cy="62" rx="13.5" ry="13.5" fill="#39c690"/><ellipse cx="68" cy="60" rx="14.5" ry="14.5" fill="#59dca6"/><circle cx="86" cy="53" r="16" fill="#74e6bb"/><path d="M78 40 Q74 30 70 27" stroke="#2f8f68" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="70" cy="26" r="3" fill="#ef7aa8"/><path d="M94 40 Q98 30 101 28" stroke="#2f8f68" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="101" cy="27" r="3" fill="#ef7aa8"/><circle cx="82" cy="50" r="3.4" fill="#1b3b2e"/><circle cx="92" cy="51" r="3.4" fill="#1b3b2e"/><path d="M80 60 Q86 65 93 59" stroke="#1b3b2e" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>';
+  const NABI=RB+'<g><ellipse cx="50" cy="52" rx="4.5" ry="20" fill="#5a4633"/><path d="M48 40 Q18 18 20 44 Q20 60 47 54 Z" fill="url(#RBg)" stroke="#5a4633" stroke-width="2"/><path d="M52 40 Q82 18 80 44 Q80 60 53 54 Z" fill="url(#RBg)" stroke="#5a4633" stroke-width="2"/><path d="M48 56 Q26 60 30 80 Q40 86 48 64 Z" fill="url(#RBg)" stroke="#5a4633" stroke-width="2"/><path d="M52 56 Q74 60 70 80 Q60 86 52 64 Z" fill="url(#RBg)" stroke="#5a4633" stroke-width="2"/><path d="M48 34 Q42 22 36 20" stroke="#5a4633" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M52 34 Q58 22 64 20" stroke="#5a4633" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>';
+  const CICADA='<g><ellipse cx="50" cy="30" rx="15" ry="13" fill="#5a9ee0"/><circle cx="41" cy="27" r="4.4" fill="#1c3350"/><circle cx="59" cy="27" r="4.4" fill="#1c3350"/><ellipse cx="50" cy="58" rx="12" ry="26" fill="#4a90d9"/><path d="M50 40 L50 78" stroke="#2c5f9a" stroke-width="2" opacity=".5"/><path d="M44 46 Q10 44 24 78 Q42 78 46 56 Z" fill="#bcd8f4" stroke="#7fa9d6" stroke-width="1.6" opacity=".82"/><path d="M56 46 Q90 44 76 78 Q58 78 54 56 Z" fill="#bcd8f4" stroke="#7fa9d6" stroke-width="1.6" opacity=".82"/><path d="M46 82 Q50 88 54 82" stroke="#2c5f9a" stroke-width="2" fill="none"/></g>';
+  const FROG='<g><ellipse cx="50" cy="66" rx="30" ry="24" fill="#57c84d"/><path d="M22 66 Q14 84 26 84" stroke="#3a9a33" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M78 66 Q86 84 74 84" stroke="#3a9a33" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="34" cy="34" r="15" fill="#6fdb63"/><circle cx="66" cy="34" r="15" fill="#6fdb63"/><circle cx="34" cy="34" r="7" fill="#fff"/><circle cx="66" cy="34" r="7" fill="#fff"/><circle cx="35" cy="35" r="3.6" fill="#1b3b1a"/><circle cx="65" cy="35" r="3.6" fill="#1b3b1a"/><path d="M32 62 Q50 78 68 62" stroke="#1f6b1c" stroke-width="3.4" fill="none" stroke-linecap="round"/><circle cx="40" cy="66" r="3" fill="#ef8fae" opacity=".55"/><circle cx="60" cy="66" r="3" fill="#ef8fae" opacity=".55"/></g>';
+  const STAG='<g><path d="M40 30 Q30 12 20 16 Q30 20 34 34" fill="#f07fa9" stroke="#c74e7e" stroke-width="1.6"/><path d="M60 30 Q70 12 80 16 Q70 20 66 34" fill="#f07fa9" stroke="#c74e7e" stroke-width="1.6"/><ellipse cx="50" cy="42" rx="15" ry="12" fill="#ec6b9d"/><circle cx="43" cy="40" r="3.2" fill="#3a1226"/><circle cx="57" cy="40" r="3.2" fill="#3a1226"/><ellipse cx="50" cy="66" rx="19" ry="22" fill="#f07fa9"/><path d="M50 50 L50 86" stroke="#c74e7e" stroke-width="2.4" opacity=".6"/><path d="M31 60 L18 54 M31 70 L17 70 M69 60 L82 54 M69 70 L83 70" stroke="#c74e7e" stroke-width="3.4" stroke-linecap="round"/></g>';
+  const MANTIS='<g><ellipse cx="58" cy="70" rx="10" ry="22" fill="#e8c93a" transform="rotate(12 58 70)"/><polygon points="30,26 46,20 44,36" fill="#ecd45a" stroke="#b89a1e" stroke-width="1.6"/><circle cx="33" cy="25" r="4" fill="#3a3210"/><circle cx="43" cy="24" r="4" fill="#3a3210"/><path d="M32 16 Q28 8 24 6 M40 15 Q44 7 48 6" stroke="#b89a1e" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M44 32 Q60 34 62 48" stroke="#d8bb2e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M40 40 Q20 40 22 26 Q30 30 46 34 Z" fill="#efd968" stroke="#b89a1e" stroke-width="1.6"/><path d="M42 44 Q22 48 26 34" stroke="#b89a1e" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M64 58 Q78 62 80 76 M62 74 Q74 82 76 90" stroke="#d8bb2e" stroke-width="3.4" fill="none" stroke-linecap="round"/></g>';
+  const PILL='<g>'
+    +'<path d="M32 46 L20 40 M30 55 L17 53 M30 64 L18 67 M33 72 L23 78" stroke="#5a4a2e" stroke-width="2.6" stroke-linecap="round"/>'
+    +'<path d="M68 46 L80 40 M70 55 L83 53 M70 64 L82 67 M67 72 L77 78" stroke="#5a4a2e" stroke-width="2.6" stroke-linecap="round"/>'
+    +'<ellipse cx="50" cy="79" rx="13" ry="8.5" fill="#9457c9" stroke="#5a4a2e" stroke-width="1.6"/>'
+    +'<ellipse cx="50" cy="70" rx="19" ry="7.5" fill="#4a90d9" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="61" rx="23" ry="7.5" fill="#57c84d" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="52" rx="24" ry="7.5" fill="#f1cf3b" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="43" rx="22" ry="7.5" fill="#ef8f39" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="35" rx="18" ry="7.5" fill="#e5544b" stroke="#5a4a2e" stroke-width="1.4"/>'
+    +'<ellipse cx="50" cy="27" rx="13" ry="8" fill="#c99a5e" stroke="#5a4a2e" stroke-width="1.6"/>'
+    +'<path d="M43 21 Q38 14 33 12 M57 21 Q62 14 67 12" stroke="#8a6a3e" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+    +'<circle cx="45" cy="27" r="2.3" fill="#241a0c"/><circle cx="55" cy="27" r="2.3" fill="#241a0c"/>'
+    +'</g>';
+  const SCORP='<g><ellipse cx="46" cy="60" rx="15" ry="12" fill="#9457c9"/><ellipse cx="34" cy="52" rx="9" ry="7" fill="#a76fd4"/><path d="M26 50 Q14 44 12 52 Q12 58 22 56 M26 54 Q16 58 18 64" stroke="#7a3fae" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M22 44 L10 40 M20 48 L8 50" stroke="#7a3fae" stroke-width="3" stroke-linecap="round"/><path d="M58 64 Q76 66 80 50 Q82 38 70 34" fill="none" stroke="#9457c9" stroke-width="8" stroke-linecap="round"/><circle cx="69" cy="31" r="6" fill="#b57ee0"/><path d="M69 26 L72 20" stroke="#7a3fae" stroke-width="3.4" stroke-linecap="round"/><path d="M40 70 L34 80 M48 72 L46 84 M54 70 L60 80" stroke="#7a3fae" stroke-width="3" stroke-linecap="round"/><circle cx="41" cy="56" r="2.4" fill="#2a123a"/><circle cx="50" cy="56" r="2.4" fill="#2a123a"/></g>';
+  const DFLY='<g><ellipse cx="50" cy="26" rx="9" ry="8" fill="#ef8f39"/><circle cx="45" cy="24" r="3.6" fill="#5a2f0a"/><circle cx="55" cy="24" r="3.6" fill="#5a2f0a"/><rect x="46.5" y="32" width="7" height="52" rx="3.5" fill="#f0a44f"/><path d="M50 40 L50 80" stroke="#c26e1e" stroke-width="1.6" opacity=".5"/><path d="M46 40 Q14 30 12 42 Q14 50 46 46 Z" fill="#ffe6c2" stroke="#e2a45c" stroke-width="1.5" opacity=".85"/><path d="M54 40 Q86 30 88 42 Q86 50 54 46 Z" fill="#ffe6c2" stroke="#e2a45c" stroke-width="1.5" opacity=".85"/><path d="M46 50 Q18 44 16 56 Q18 62 46 56 Z" fill="#ffe6c2" stroke="#e2a45c" stroke-width="1.5" opacity=".85"/><path d="M54 50 Q82 44 84 56 Q82 62 54 56 Z" fill="#ffe6c2" stroke="#e2a45c" stroke-width="1.5" opacity=".85"/></g>';
+  const LIZARD='<g><path d="M70 34 Q84 30 86 42 Q86 52 74 50" fill="none" stroke="#63c9ea" stroke-width="9" stroke-linecap="round"/><ellipse cx="48" cy="50" rx="24" ry="14" fill="#5fc6e8"/><ellipse cx="24" cy="46" rx="12" ry="10" fill="#7ad4f0"/><circle cx="18" cy="43" r="3" fill="#123c4a"/><path d="M60 42 L70 32 M64 60 L74 70 M36 42 L28 30 M40 60 L34 72" stroke="#4aa9cc" stroke-width="5" stroke-linecap="round"/><circle cx="42" cy="48" r="2.4" fill="#eafaff" opacity=".7"/><circle cx="52" cy="52" r="2.4" fill="#eafaff" opacity=".7"/><circle cx="47" cy="45" r="2.4" fill="#eafaff" opacity=".7"/></g>';
+  const MAYFLY='<g>'
+    +'<path d="M50 76 Q45 90 39 98 M50 76 Q50 91 50 99 M50 76 Q55 90 61 98" stroke="#4a90d9" stroke-width="1.7" fill="none" stroke-linecap="round"/>'
+    +'<rect x="46.5" y="32" width="7" height="46" rx="3.5" fill="#5a9ee0"/>'
+    +'<path d="M50 40 L50 76" stroke="#2c5f9a" stroke-width="1.3" opacity=".45"/>'
+    +'<path d="M48 40 Q22 12 31 4 Q47 10 49 38 Z" fill="#cfe6fb" stroke="#7fa9d6" stroke-width="1.6" opacity=".85"/>'
+    +'<path d="M52 40 Q78 12 69 4 Q53 10 51 38 Z" fill="#cfe6fb" stroke="#7fa9d6" stroke-width="1.6" opacity=".85"/>'
+    +'<path d="M48 46 Q33 40 33 52 Q41 54 48 50 Z" fill="#e6f2fd" stroke="#7fa9d6" stroke-width="1.2" opacity=".8"/>'
+    +'<path d="M52 46 Q67 40 67 52 Q59 54 52 50 Z" fill="#e6f2fd" stroke="#7fa9d6" stroke-width="1.2" opacity=".8"/>'
+    +'<circle cx="50" cy="29" r="8" fill="#4a90d9"/>'
+    +'<circle cx="46.5" cy="28" r="2.8" fill="#12314f"/><circle cx="53.5" cy="28" r="2.8" fill="#12314f"/>'
+    +'<path d="M46 23 Q42 17 39 15 M54 23 Q58 17 61 15" stroke="#2c5f9a" stroke-width="1.7" fill="none" stroke-linecap="round"/>'
+    +'</g>';
+  const LONGHORN=RBV+'<g>'
+    +'<path d="M43 24 Q20 12 8 22 Q2 30 10 38" stroke="#2e2013" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
+    +'<path d="M57 24 Q80 12 92 22 Q98 30 90 38" stroke="#2e2013" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
+    +'<path d="M35 58 L19 62 M36 68 L20 74 M65 58 L81 62 M64 68 L80 74" stroke="#2e2013" stroke-width="2.6" stroke-linecap="round"/>'
+    +'<ellipse cx="50" cy="31" rx="9" ry="8" fill="#3a2a1a"/>'
+    +'<circle cx="46" cy="30" r="2.6" fill="#f6d94a"/><circle cx="54" cy="30" r="2.6" fill="#f6d94a"/>'
+    +'<ellipse cx="50" cy="64" rx="20" ry="27" fill="url(#RBv)" stroke="#2e2013" stroke-width="2"/>'
+    +'<path d="M31 55 H69 M30 64 H70 M31 73 H69 M34 82 H66" stroke="#2e2013" stroke-width="1.5" opacity=".5"/>'
+    +'<path d="M50 38 L50 90" stroke="#2e2013" stroke-width="1.6" opacity=".65"/>'
+    +'</g>';
+  const INSECTS=[
+    I('cater','애벌레','#4fd6a0',CATER), I('nabi','나비','#ef8f39',NABI),
+    I('cicada','매미','#4a90d9',CICADA), I('frog','개구리','#57c84d',FROG),
+    I('stag','사슴벌레','#ec6b9d',STAG), I('mantis','사마귀','#e8c93a',MANTIS),
+    I('pill','공벌레','#b98a55',PILL), I('scorp','전갈','#9457c9',SCORP),
+    I('dfly','잠자리','#ef8f39',DFLY), I('mayfly','하루살이','#4a90d9',MAYFLY),
+    I('longhorn','하늘소','#f1cf3b',LONGHORN), I('lizard','도마뱀','#5fc6e8',LIZARD)
+  ];
+
+  // ================= 곤충 실루엣 마스크 (미로가 이 모양 안에만 생성) =================
+  function ell(x,y,rx,ry){ return function(px,py){ const dx=(px-x)/rx, dy=(py-y)/ry; return dx*dx+dy*dy<=1; }; }
+  const SILHOUETTES=[
+    { id:"butterfly", name:"나비", parts:[
+        ell(.50,.50,.075,.44),
+        ell(.30,.33,.235,.255), ell(.70,.33,.235,.255),
+        ell(.31,.68,.205,.215), ell(.69,.68,.205,.215)
+    ]},
+    { id:"beetle", name:"무당벌레", parts:[
+        ell(.50,.60,.40,.375),
+        ell(.50,.18,.17,.16)
+    ]},
+    { id:"ant", name:"개미", parts:[
+        ell(.50,.16,.145,.135),
+        ell(.50,.44,.175,.165),
+        ell(.50,.76,.235,.235)
+    ]},
+    { id:"dragonfly", name:"잠자리", parts:[
+        ell(.50,.55,.075,.46),
+        ell(.30,.34,.245,.115), ell(.70,.34,.245,.115),
+        ell(.31,.60,.235,.10), ell(.69,.60,.235,.10),
+        ell(.50,.13,.115,.11)
+    ]},
+    { id:"spider", name:"거미", parts:[
+        ell(.50,.54,.21,.22), ell(.50,.34,.13,.12),          // abdomen + head
+        ell(.30,.40,.13,.055), ell(.17,.34,.11,.05),          // left-upper legs
+        ell(.70,.40,.13,.055), ell(.83,.34,.11,.05),          // right-upper legs
+        ell(.30,.66,.13,.055), ell(.17,.72,.11,.05),          // left-lower legs
+        ell(.70,.66,.13,.055), ell(.83,.72,.11,.05)           // right-lower legs
+    ]},
+    { id:"bee", name:"꿀벌", parts:[
+        ell(.50,.58,.30,.20), ell(.50,.30,.145,.13),          // striped body + head
+        ell(.33,.34,.155,.10), ell(.67,.34,.155,.10)          // wings
+    ]},
+    { id:"caterpillar", name:"애벌레", parts:[
+        ell(.20,.62,.115,.115), ell(.33,.55,.125,.125), ell(.46,.51,.135,.135),
+        ell(.60,.53,.135,.135), ell(.73,.60,.125,.125), ell(.83,.69,.115,.115)
+    ]},
+    { id:"grasshopper", name:"메뚜기", parts:[
+        ell(.46,.48,.30,.115),                                 // long body
+        ell(.20,.44,.11,.11),                                  // head (left)
+        ell(.63,.62,.11,.19), ell(.72,.44,.075,.15)            // big hind leg
+    ]}
+  ];
+
+  // ================= 상태 / 요소 =================
+  const DIFF={ easy:{n:9,name:"쉬움"}, normal:{n:13,name:"보통"}, hard:{n:17,name:"어려움"}, expert:{n:23,name:"매우 어려움"} };
+  const DIFF_KEY="maze_diff", BEST_KEY="maze_best";
+    const boardEl=document.getElementById("board"), gridEl=document.getElementById("grid");
+  const playerEl=document.getElementById("player"), goalEl=document.getElementById("goal"), startEl=document.getElementById("startM");
+  const timeEl=document.getElementById("time"), movesEl=document.getElementById("moves"), bestEl=document.getElementById("best");
+  const ficoEl=document.getElementById("fico"), fnameEl=document.getElementById("fname"), hintEl=document.getElementById("hint");
+  const winEl=document.getElementById("win"), winIco=document.getElementById("winIco"), winStats=document.getElementById("winStats"), winBest=document.getElementById("winBest");
+
+  let diff="easy"; try{ const s=localStorage.getItem(DIFF_KEY); if(s&&DIFF[s]) diff=s; }catch(e){}
+  let N=9, cells=[], inMask=[], pr=0, pc=0, gr=0, gc=0, cell=30, moves=0, insect=INSECTS[0], silh=SILHOUETTES[0];
+  let t0=0, timer=null, running=false, won=false, tracing=false, path=[], lastBlock=0;
+  let Z=1, baseCell=30, camX=0, camY=0; const midEl=boardEl.parentElement;
+  const ZMIN=1, ZMAX=3;
+  let hapOn=true;
+  function buzz(ms){ if(!hapOn) return; try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+  function bestGet(){ try{ return JSON.parse(localStorage.getItem(BEST_KEY)||"{}"); }catch(e){ return {}; } }
+  function bestSet(o){ try{ localStorage.setItem(BEST_KEY, JSON.stringify(o)); }catch(e){} }
+  function fmt(ms){ return (ms/1000).toFixed(1)+"s"; }
+  const DZ={up:[-1,0],down:[1,0],left:[0,-1],right:[0,1]};
+  const OPP={n:"s",s:"n",e:"w",w:"e"};
+
+  function buildMask(sil,n){
+    const m=[]; for(let r=0;r<n;r++){ m.push([]); for(let c=0;c<n;c++){
+      const x=(c+0.5)/n, y=(r+0.5)/n; let inside=false;
+      for(const p of sil.parts){ if(p(x,y)){ inside=true; break; } }
+      m[r].push(inside);
+    }}
+    const lab=[]; for(let r=0;r<n;r++) lab.push(new Array(n).fill(0));
+    let best=[], bestSz=0, id=0;
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+      if(m[r][c]&&!lab[r][c]){ id++; const comp=[]; const st=[[r,c]]; lab[r][c]=id;
+        while(st.length){ const cur=st.pop(); comp.push(cur); const rr=cur[0],cc=cur[1];
+          for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){ const nr=rr+d[0],nc=cc+d[1];
+            if(nr>=0&&nr<n&&nc>=0&&nc<n&&m[nr][nc]&&!lab[nr][nc]){ lab[nr][nc]=id; st.push([nr,nc]); } } }
+        if(comp.length>bestSz){ bestSz=comp.length; best=comp; }
+      }
+    }
+    const mask=[]; for(let r=0;r<n;r++) mask.push(new Array(n).fill(false));
+    for(const rc of best) mask[rc[0]][rc[1]]=true;
+    return mask;
+  }
+
+  function genMaze(mask,n){
+    const g=[]; for(let r=0;r<n;r++){ g.push([]); for(let c=0;c<n;c++) g[r].push({n:true,e:true,s:true,w:true,v:false}); }
+    let sr=0,sc=0; outer: for(let r=0;r<n;r++) for(let c=0;c<n;c++){ if(mask[r][c]){ sr=r;sc=c; break outer; } }
+    const stack=[[sr,sc]]; g[sr][sc].v=true;
+    const DIRW={n:[-1,0],s:[1,0],e:[0,1],w:[0,-1]};
+    while(stack.length){
+      const cur=stack[stack.length-1]; const r=cur[0],c=cur[1]; const opts=[];
+      for(const d of ["n","e","s","w"]){ const nr=r+DIRW[d][0], nc=c+DIRW[d][1];
+        if(nr>=0&&nr<n&&nc>=0&&nc<n&&mask[nr][nc]&&!g[nr][nc].v) opts.push(d); }
+      if(!opts.length){ stack.pop(); continue; }
+      const d=opts[(Math.random()*opts.length)|0]; const nr=r+DIRW[d][0], nc=c+DIRW[d][1];
+      g[r][c][d]=false; g[nr][nc][OPP[d]]=false; g[nr][nc].v=true; stack.push([nr,nc]);
+    }
+    return g;
+  }
+
+  function openTo(r,c,d){ const w=cells[r][c]; if(!w) return false;
+    if(d==="up") return !w.n; if(d==="down") return !w.s; if(d==="left") return !w.w; return !w.e; }
+  function isIn(r,c){ return r>=0&&r<N&&c>=0&&c<N&&inMask[r][c]; }
+
+  function bfsFar(sr,sc){
+    const dist={}; const q=[[sr,sc]]; dist[sr+","+sc]=0; let far=[sr,sc], fd=0; let head=0;
+    while(head<q.length){ const cur=q[head++]; const r=cur[0],c=cur[1]; const dd=dist[r+","+c];
+      for(const d of ["up","down","left","right"]){ if(!openTo(r,c,d)) continue;
+        const nr=r+DZ[d][0], nc=c+DZ[d][1]; const k=nr+","+nc;
+        if(dist[k]===undefined){ dist[k]=dd+1; if(dist[k]>fd){fd=dist[k];far=[nr,nc];} q.push([nr,nc]); } } }
+    return {far,fd};
+  }
+
+  function pickInsect(){ insect=INSECTS[(Math.random()*INSECTS.length)|0];
+    ficoEl.innerHTML=insect.svg; fnameEl.textContent=insect.name; playerEl.innerHTML=insect.svg;
+    boardEl.style.setProperty("--trail", hexA(insect.color,0.4));
+  }
+  function hexA(hex,a){ const h=hex.replace('#',''); const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
+    return 'rgba('+r+','+g+','+b+','+a+')'; }
+
+  function computeBase(){ const vpW=midEl.clientWidth||300, vpH=midEl.clientHeight||300;
+    const side=Math.max(120, Math.min(Math.min(vpW,vpH), 600)); baseCell=Math.max(8, Math.floor(side/N)); }
+  function relayout(){ cell=Math.max(6, Math.round(baseCell*Z)); const px=cell*N;
+    boardEl.style.width=px+"px"; boardEl.style.height=px+"px";
+    const wt=Math.max(2, Math.min(6, Math.round(cell/11))); boardEl.style.setProperty("--wall", wt+"px solid #6b4a2b");
+    sizeTrail(); drawTrail(); layout(); }
+  function clampCam(){ const vpW=midEl.clientWidth, vpH=midEl.clientHeight, bp=cell*N;
+    if(bp<=vpW) camX=(vpW-bp)/2; else camX=Math.max(vpW-bp, Math.min(0, camX));
+    if(bp<=vpH) camY=(vpH-bp)/2; else camY=Math.max(vpH-bp, Math.min(0, camY)); }
+  function applyCam(){ clampCam(); boardEl.style.transform="translate("+Math.round(camX)+"px,"+Math.round(camY)+"px)"; }
+  function fitView(){ computeBase(); Z=1; relayout(); camX=0; camY=0; applyCam(); updateZoomUI(); }
+  function sizeBoard(){ computeBase(); relayout(); applyCam(); updateZoomUI(); }
+  function ensureVisible(){ const vpW=midEl.clientWidth, vpH=midEl.clientHeight, bp=cell*N;
+    if(bp<=vpW && bp<=vpH){ applyCam(); return; }
+    const m=Math.min(vpW,vpH)*0.28;
+    const sx=camX+(pc+0.5)*cell, sy=camY+(pr+0.5)*cell;
+    if(sx<m) camX+=(m-sx); else if(sx>vpW-m) camX-=(sx-(vpW-m));
+    if(sy<m) camY+=(m-sy); else if(sy>vpH-m) camY-=(sy-(vpH-m));
+    applyCam(); }
+  function zoomAt(mx,my,newZ){ newZ=Math.max(ZMIN, Math.min(ZMAX, newZ)); const bpOld=cell*N;
+    const fx=(mx-camX)/bpOld, fy=(my-camY)/bpOld;      // 초점 아래 보드 비율 고정
+    Z=newZ; relayout(); const bpNew=cell*N;
+    camX=mx-fx*bpNew; camY=my-fy*bpNew; applyCam(); updateZoomUI(); }
+  function setZoom(z){ zoomAt(midEl.clientWidth/2, midEl.clientHeight/2, z); }
+  function updateZoomUI(){ const zi=document.getElementById("zoomIn"), zo=document.getElementById("zoomOut");
+    if(zi) zi.style.opacity = Z>=ZMAX-1e-3 ? .45 : 1;
+    if(zo) zo.style.opacity = Z<=ZMIN+1e-3 ? .45 : 1; }
+
+  function buildGrid(){
+    gridEl.style.gridTemplateColumns="repeat("+N+",1fr)";
+    gridEl.style.gridTemplateRows="repeat("+N+",1fr)";
+    let html="";
+    for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+      if(!inMask[r][c]){ html+='<div class="cell"></div>'; continue; }
+      const w=cells[r][c]; let cl="cell in";
+      if(w.n || !isIn(r-1,c)) cl+=" wn";
+      if(w.e || !isIn(r,c+1)) cl+=" we";
+      if(w.s || !isIn(r+1,c)) cl+=" ws";
+      if(w.w || !isIn(r,c-1)) cl+=" ww";
+      html+='<div class="'+cl+'"></div>';
+    }
+    gridEl.innerHTML=html;
+  }
+  function cellDiv(r,c){ return gridEl.children[r*N+c]; }
+
+  function layout(){
+    playerEl.style.width=Math.round(cell*0.98)+"px"; playerEl.style.height=Math.round(cell*0.98)+"px";
+    goalEl.style.width=cell+"px"; goalEl.style.height=cell+"px"; goalEl.style.fontSize=Math.round(cell*0.62)+"px";
+    goalEl.style.left=(gc*cell)+"px"; goalEl.style.top=(gr*cell)+"px";
+    startEl.style.width=cell+"px"; startEl.style.height=cell+"px";
+    startEl.style.left=(pc*cell)+"px"; startEl.style.top=(pr*cell)+"px";
+    placePlayer(false);
+  }
+  function placePlayer(animate){
+    const pad=cell*0.01;
+    if(!animate){ playerEl.style.transition="none"; }
+    playerEl.style.left=Math.round(pc*cell+pad)+"px";
+    playerEl.style.top =Math.round(pr*cell+pad)+"px";
+    if(!animate){ void playerEl.offsetWidth; playerEl.style.transition=""; }
+  }
+  const trailSvg=document.getElementById("trail");
+  function trailColor(i){ return "hsl("+((i*38)%360)+",82%,60%)"; }   // 경로 순서대로 무지개
+  function cellCenter(r,c){ return [(c+0.5)*cell, (r+0.5)*cell]; }
+  function drawTrail(){
+    if(!trailSvg) return;
+    const w=Math.max(6, Math.round(cell*0.66));                      // 통로 폭에 꽉 차는 굵은 리본
+    let g="";
+    for(let i=0;i+1<path.length;i++){
+      const a=cellCenter(path[i][0],path[i][1]), b=cellCenter(path[i+1][0],path[i+1][1]);
+      g+='<line x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'" stroke="'+trailColor(i)+'" stroke-width="'+w+'" stroke-linecap="round"/>';
+    }
+    // 꼭짓점 원으로 모서리 이음 매끈하게
+    for(let i=0;i<path.length;i++){
+      const p=cellCenter(path[i][0],path[i][1]);
+      g+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(w*0.5).toFixed(1)+'" fill="'+trailColor(Math.max(0,i-1))+'"/>';
+    }
+    trailSvg.innerHTML=g;
+  }
+  function sizeTrail(){ if(!trailSvg) return; const px=cell*N;
+    trailSvg.setAttribute("width",px); trailSvg.setAttribute("height",px); trailSvg.setAttribute("viewBox","0 0 "+px+" "+px); }
+
+  function newMaze(){
+    N=DIFF[diff].n;
+    silh=SILHOUETTES[(Math.random()*SILHOUETTES.length)|0];
+    inMask=buildMask(silh,N);
+    cells=genMaze(inMask,N);
+    let sr=0,sc=0; outer: for(let r=0;r<N;r++) for(let c=0;c<N;c++){ if(inMask[r][c]){ sr=r;sc=c; break outer; } }
+    const a=bfsFar(sr,sc); const b=bfsFar(a.far[0],a.far[1]);
+    pr=a.far[0]; pc=a.far[1]; gr=b.far[0]; gc=b.far[1];
+    moves=0; won=false; running=false; tracing=false; path=[[pr,pc]];
+    if(timer){ clearInterval(timer); timer=null; }
+    timeEl.textContent="0.0s"; movesEl.textContent="0";
+    const bst=bestGet()[diff]; bestEl.textContent = bst?fmt(bst):"-";
+    winEl.classList.remove("show");
+    pickInsect();
+    buildGrid(); fitView();
+    startEl.style.left=(pc*cell)+"px"; startEl.style.top=(pr*cell)+"px";
+    drawTrail();
+    hintEl.innerHTML=silh.name+" 모양 미로! 곤충을 <b>손가락으로 쓸어</b> 🏁까지 데려가요.";
+  }
+
+  function startTimerIfNeeded(){ if(running) return; running=true; t0=Date.now();
+    timer=setInterval(()=>{ timeEl.textContent=((Date.now()-t0)/1000).toFixed(1)+"s"; }, 100); }
+
+  function stepTo(nr,nc){
+    // 완전미로라 재방문은 '바로 직전 칸'뿐 → 그 경우는 되돌아가기(자취 삭제)
+    const prev = path.length>=2 ? path[path.length-2] : null;
+    if(prev && prev[0]===nr && prev[1]===nc){
+      path.pop();                                            // 왔던 길 되돌아가면 자취 사라짐
+    } else {
+      path.push([nr,nc]);                                    // 새 길이면 무지개 자취 추가
+    }
+    pr=nr; pc=nc; moves++; movesEl.textContent=moves;
+    drawTrail();
+    startTimerIfNeeded();
+    playerEl.style.transition="left .09s linear,top .09s linear";
+    placePlayer(true);
+    ensureVisible();
+    if(pr===gr&&pc===gc){ buzz([15,30]); setTimeout(win,120); }
+  }
+
+  // ============ 손가락 트레이스: 손끝을 향해 통로를 따라 곤충이 따라옴 ============
+  function pointToXY(clientX,clientY){ const rect=boardEl.getBoundingClientRect();
+    return { x:clientX-rect.left, y:clientY-rect.top }; }
+  function fingerInCell(px,py,r,c){ const x0=c*cell, y0=r*cell; return px>=x0 && px<x0+cell && py>=y0 && py<y0+cell; }
+  function advanceToward(px,py){
+    if(won) return;
+    let guard=0, maxStep=N*N;
+    while(guard++<maxStep){
+      // 1순위: 손끝이 '지금 올라와 있는' 열린 인접 칸으로만 이동 → 통로 폭 안에서 좌우로 안 튐(와따가따 방지)
+      let target=null;
+      for(const d of ["up","down","left","right"]){ if(!openTo(pr,pc,d)) continue;
+        const nr=pr+DZ[d][0], nc=pc+DZ[d][1];
+        if(fingerInCell(px,py,nr,nc)){ target=[nr,nc]; break; } }
+      if(target){ stepTo(target[0],target[1]); if(won) break; continue; }
+      // 손끝이 현재 칸 안이면 멈춤(움직임 없음 → 미세 지터 무시)
+      if(fingerInCell(px,py,pr,pc)) break;
+      // 2순위(빠른 드래그): 손끝이 멀리 있으면 손끝을 향해 열린 이웃으로 한 칸만. 벽이면 멈춤.
+      const curCx=(pc+0.5)*cell, curCy=(pr+0.5)*cell;
+      const curd=(curCx-px)*(curCx-px)+(curCy-py)*(curCy-py);
+      let best=null, bestd=curd;
+      for(const d of ["up","down","left","right"]){ if(!openTo(pr,pc,d)) continue;
+        const nr=pr+DZ[d][0], nc=pc+DZ[d][1]; const nx=(nc+0.5)*cell, ny=(nr+0.5)*cell;
+        const dd=(nx-px)*(nx-px)+(ny-py)*(ny-py);
+        if(dd<bestd){ bestd=dd; best=[nr,nc]; } }
+      if(!best){
+        break;   // 벽에 막히면 흔들림 없이 그냥 멈춤
+      }
+      stepTo(best[0],best[1]);
+      if(won) break;
+    }
+  }
+  function onDown(clientX,clientY){ if(won) return; tracing=true; const p=pointToXY(clientX,clientY); advanceToward(p.x,p.y); }
+  function onMove(clientX,clientY){ if(!tracing||won) return; const p=pointToXY(clientX,clientY); advanceToward(p.x,p.y); }
+  function onUp(){ tracing=false; }
+
+  // 입력 모드: 미로(칸) 위 한 손가락=곤충 트레이스 / 빈 곳 드래그=지도 이동(팬) / 두 손가락=핀치 확대
+  let mode=null, panSX=0, panSY=0, panCX=0, panCY=0;
+  let pinchD0=0, pinchZ0=1, pinchFx=0, pinchFy=0;
+  function midXY(clientX,clientY){ const r=midEl.getBoundingClientRect(); return [clientX-r.left, clientY-r.top]; }
+  function onCell(clientX,clientY){ const p=pointToXY(clientX,clientY); const r=Math.floor(p.y/cell), c=Math.floor(p.x/cell); return isIn(r,c); }
+  function pinchStart(t1,t2){ mode="pinch"; tracing=false;
+    pinchD0=Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY)||1; pinchZ0=Z;
+    const mm=midXY((t1.clientX+t2.clientX)/2,(t1.clientY+t2.clientY)/2); const bp=cell*N;
+    pinchFx=(mm[0]-camX)/bp; pinchFy=(mm[1]-camY)/bp; }
+  function pinchMove(t1,t2){ const d=Math.hypot(t1.clientX-t2.clientX, t1.clientY-t2.clientY)||1;
+    const nz=Math.max(ZMIN,Math.min(ZMAX, pinchZ0*d/pinchD0));
+    const mm=midXY((t1.clientX+t2.clientX)/2,(t1.clientY+t2.clientY)/2);
+    Z=nz; relayout(); const bp=cell*N; camX=mm[0]-pinchFx*bp; camY=mm[1]-pinchFy*bp; applyCam(); updateZoomUI(); }
+
+  midEl.addEventListener("touchstart",e=>{ e.preventDefault();
+    if(e.touches.length>=2){ pinchStart(e.touches[0],e.touches[1]); return; }
+    const t=e.changedTouches[0];
+    if(!won && onCell(t.clientX,t.clientY)){ mode="trace"; onDown(t.clientX,t.clientY); }
+    else { mode="pan"; panSX=t.clientX; panSY=t.clientY; panCX=camX; panCY=camY; }
+  }, {passive:false});
+  midEl.addEventListener("touchmove",e=>{ e.preventDefault();
+    if(mode==="pinch" && e.touches.length>=2){ pinchMove(e.touches[0],e.touches[1]); return; }
+    const t=e.changedTouches[0];
+    if(mode==="trace"){ onMove(t.clientX,t.clientY); }
+    else if(mode==="pan"){ camX=panCX+(t.clientX-panSX); camY=panCY+(t.clientY-panSY); applyCam(); }
+  }, {passive:false});
+  midEl.addEventListener("touchend",e=>{ if(mode==="pinch" && e.touches.length>=1){ mode=null; return; } onUp(); mode=null; }, {passive:true});
+
+  // 데스크톱: 마우스 = 칸 위면 트레이스, 빈 곳이면 팬 / 휠 = 확대
+  midEl.addEventListener("pointerdown",e=>{ if(e.pointerType==="touch") return;
+    if(!won && onCell(e.clientX,e.clientY)){ mode="trace"; onDown(e.clientX,e.clientY); }
+    else { mode="pan"; panSX=e.clientX; panSY=e.clientY; panCX=camX; panCY=camY; } });
+  window.addEventListener("pointermove",e=>{ if(e.pointerType==="touch") return;
+    if(mode==="trace"){ onMove(e.clientX,e.clientY); } else if(mode==="pan"){ camX=panCX+(e.clientX-panSX); camY=panCY+(e.clientY-panSY); applyCam(); } });
+  window.addEventListener("pointerup",e=>{ if(e.pointerType==="touch") return; onUp(); mode=null; });
+  midEl.addEventListener("wheel",e=>{ e.preventDefault(); const mm=midXY(e.clientX,e.clientY);
+    zoomAt(mm[0],mm[1], Z*(e.deltaY<0?1.12:1/1.12)); }, {passive:false});
+  window.addEventListener("keydown",e=>{ const m={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
+    if(m[e.key]){ e.preventDefault(); const d=m[e.key]; if(openTo(pr,pc,d)){ stepTo(pr+DZ[d][0],pc+DZ[d][1]); } } });
+
+  function win(){
+    if(won) return; won=true; running=false; tracing=false;
+    if(timer){ clearInterval(timer); timer=null; }
+    const el=Date.now()-t0;
+    const store=bestGet(); const prev=store[diff]; let rec=false;
+    if(!prev || el<prev){ store[diff]=el; bestSet(store); rec=true; }
+    bestEl.textContent=fmt(store[diff]);
+    winIco.innerHTML=insect.svg;
+    winStats.textContent=DIFF[diff].name+" · "+silh.name+" 미로 · ⏱ "+fmt(el)+" · 👣 "+moves+"수";
+    winBest.textContent= rec ? "🏅 최고 기록 갱신!" : ("최고: "+fmt(store[diff]));
+    winEl.classList.add("show"); celebrate();
+  }
+  function celebrate(){
+    const wrap=document.createElement("div"); wrap.className="confettiWrap";
+    const cols=["#e5544b","#ef8f39","#f1cf3b","#57c84d","#4a90d9","#9457c9","#ec6b9d"];
+    for(let i=0;i<42;i++){ const d=document.createElement("div"); d.className="confetti";
+      d.style.left=(Math.random()*100)+"%"; d.style.background=cols[(Math.random()*cols.length)|0];
+      d.style.animationDuration=(1.6+Math.random()*1.4)+"s"; d.style.animationDelay=(Math.random()*0.3)+"s";
+      d.style.transform="rotate("+(Math.random()*360)+"deg)"; wrap.appendChild(d); }
+    for(let i=0;i<10;i++){ const s=document.createElement("div"); s.className="star"; s.textContent=Math.random()<.5?"⭐":"✨";
+      s.style.left=(Math.random()*100)+"%"; s.style.animationDuration=(1.8+Math.random()*1.3)+"s"; s.style.animationDelay=(Math.random()*0.4)+"s"; wrap.appendChild(s); }
+    document.body.appendChild(wrap); setTimeout(()=>wrap.remove(), 3200);
+  }
+
+  // ================= UI 배선 =================
+  document.querySelectorAll("#diffSeg button").forEach(b=>{
+    b.addEventListener("click",()=>{ diff=b.dataset.d; try{localStorage.setItem(DIFF_KEY,diff);}catch(e){}
+      document.querySelectorAll("#diffSeg button").forEach(x=>x.classList.toggle("on",x===b)); newMaze(); });
+  });
+  document.getElementById("newBtn").addEventListener("click",newMaze);
+  document.getElementById("againBtn").addEventListener("click",newMaze);
+  document.getElementById("zoomIn").addEventListener("click",()=>setZoom(Z+0.5));
+  document.getElementById("zoomOut").addEventListener("click",()=>setZoom(Z-0.5));
+  window.addEventListener("resize",()=>{ if(cells.length){ sizeBoard(); } });
+  window.addEventListener("message",e=>{ const d=e.data; if(d&&d.type==="haptics") hapOn=!!d.on; });
+
+  (function(){ document.querySelectorAll("#diffSeg button").forEach(x=>x.classList.toggle("on",x.dataset.d===diff)); })();
+  newMaze();
+  setTimeout(sizeBoard,60);
+  setTimeout(sizeBoard,260);
+})();
+</script>
+</body></html>
+</template>
   <template id="tpl-kahuna"><!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -11758,8 +12293,8 @@
     function sendHap(){ try{ frame.contentWindow.postMessage({type:"haptics",on:hapOn},"*"); }catch(e){} }
     function wbuzz(ms){ if(!hapOn) return; try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
     renderHap();
-    const tplId={treasure:"tpl-treasure",skippity:"tpl-skippity",anthome:"tpl-anthome",qwirkle:"tpl-qwirkle",quoridor:"tpl-quoridor",hive:"tpl-hive",zertz:"tpl-zertz",quarto:"tpl-quarto",onitama:"tpl-onitama",kahuna:"tpl-kahuna",story:"tpl-story",pentago:"tpl-pentago",setg:"tpl-setg",dobble:"tpl-dobble",ricochet:"tpl-ricochet",rushhour:"tpl-rushhour",tantrix:"tpl-tantrix",ingenious:"tpl-ingenious",othello:"tpl-othello",pushpush:"tpl-pushpush",memory:"tpl-memory"};
-    const titles={treasure:"🐝 곤충 정원 보물찾기",skippity:"🦗 메뚜기 폴짝!",anthome:"🐜 개미집 가는 길",qwirkle:"🧩 곤충 쿼클",quoridor:"🪵 곤충 울타리 대결",hive:"🐝 곤충 하이브",zertz:"🦋 곤충 저르츠",quarto:"🐞 곤충 콰르토",onitama:"🐯 오니타마",kahuna:"🐝 곤충 카후나",story:"📖 곤충 이야기꾼",pentago:"🦋 곤충 펜타고",setg:"🔺 세트 · SET",dobble:"🔍 곤충 도블",ricochet:"🐛 애벌레 미끄럼",rushhour:"🐛 애벌레 러시아워",tantrix:"🔷 탄트릭스",ingenious:"🎯 인지니어스",othello:"⚫ 곤충 오델로",pushpush:"📦 원작 소코반",memory:"🧠 곤충 메모리"};
+    const tplId={treasure:"tpl-treasure",skippity:"tpl-skippity",anthome:"tpl-anthome",qwirkle:"tpl-qwirkle",quoridor:"tpl-quoridor",hive:"tpl-hive",zertz:"tpl-zertz",quarto:"tpl-quarto",onitama:"tpl-onitama",kahuna:"tpl-kahuna",story:"tpl-story",pentago:"tpl-pentago",setg:"tpl-setg",dobble:"tpl-dobble",ricochet:"tpl-ricochet",rushhour:"tpl-rushhour",tantrix:"tpl-tantrix",ingenious:"tpl-ingenious",othello:"tpl-othello",pushpush:"tpl-pushpush",memory:"tpl-memory",maze:"tpl-maze"};
+    const titles={treasure:"🐝 곤충 정원 보물찾기",skippity:"🦗 메뚜기 폴짝!",anthome:"🐜 개미집 가는 길",qwirkle:"🧩 곤충 쿼클",quoridor:"🪵 곤충 울타리 대결",hive:"🐝 곤충 하이브",zertz:"🦋 곤충 저르츠",quarto:"🐞 곤충 콰르토",onitama:"🐯 오니타마",kahuna:"🐝 곤충 카후나",story:"📖 곤충 이야기꾼",pentago:"🦋 곤충 펜타고",setg:"🔺 세트 · SET",dobble:"🔍 곤충 도블",ricochet:"🐛 애벌레 미끄럼",rushhour:"🐛 애벌레 러시아워",tantrix:"🔷 탄트릭스",ingenious:"🎯 인지니어스",othello:"⚫ 곤충 오델로",pushpush:"📦 원작 소코반",memory:"🧠 곤충 메모리",maze:"🌀 곤충 미로찾기"};
 
     function openGame(id){
       const tpl=document.getElementById(tplId[id]);
