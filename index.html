@@ -11338,6 +11338,19 @@
   /* stickers */
   .sticker{position:absolute;display:flex;align-items:center;justify-content:center;cursor:grab;line-height:1;transform-origin:center center;will-change:left,top,transform;}
   .sticker svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+  .sticker.text .txt{font-family:"Noto Sans KR",-apple-system,sans-serif;font-weight:900;color:#333;white-space:nowrap;
+    text-shadow:0 1px 0 #fff,0 -1px 0 #fff,1px 0 0 #fff,-1px 0 0 #fff,1px 1px 0 #fff,-1px -1px 0 #fff,0 2px 5px rgba(0,0,0,.28);}
+  .sticker.text .txt.txt-rainbow{background:linear-gradient(90deg,#e5443b,#f2892e,#f6c81f,#4fb84f,#3a86d9,#8a4fc4);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 2px 4px rgba(0,0,0,.18);}
+  .tmodal{position:absolute;inset:0;background:rgba(30,30,40,.45);display:none;align-items:center;justify-content:center;z-index:100000;}
+  .tmodal.show{display:flex;}
+  .tcard{background:#fff;border-radius:18px;padding:18px 18px 14px;width:min(86%,340px);box-shadow:0 12px 40px rgba(0,0,0,.35);}
+  .ttitle{font-size:16px;font-weight:800;color:#5a4a2e;margin-bottom:10px;text-align:center;}
+  .tcard input{width:100%;font-size:18px;padding:10px 12px;border:2px solid #d9c9a6;border-radius:12px;outline:none;box-sizing:border-box;}
+  .tcard input:focus{border-color:#7bb45a;}
+  .trow{display:flex;gap:8px;margin-top:12px;}
+  .trow button{flex:1;border:none;border-radius:12px;padding:11px;font-size:15px;font-weight:800;cursor:pointer;}
+  #tcancel{background:#eee;color:#666;}
+  #tok{background:#7bb45a;color:#fff;}
   .sticker.sel{outline:3px dashed #ff8a3d;outline-offset:3px;border-radius:10px;}
   .sticker .rz{position:absolute;right:-8px;bottom:-8px;width:28px;height:28px;border-radius:9px;background:#fff;border:2px solid #7bb45a;color:#3a7a2e;display:none;align-items:center;justify-content:center;font-size:16px;font-weight:900;cursor:nwse-resize;box-shadow:0 2px 6px rgba(0,0,0,.28);z-index:6;touch-action:none;}
   .sticker .rot{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid #5aa9e0;color:#2f7bb0;display:none;align-items:center;justify-content:center;font-size:15px;cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.28);z-index:6;touch-action:none;}
@@ -11382,6 +11395,7 @@
       <button class="pbtn del" id="delPage" title="페이지 삭제">🗑️</button>
     </div>
     <span class="spacer"></span>
+    <button class="tbtn" id="addTextBtn">✏️ 글자</button>
     <button class="tbtn" id="undoBtn">↩️ 되돌리기</button>
     <button class="tbtn" id="clearBtn">🧹 싹 지우기</button>
     <span class="count" id="count">📌 0</span>
@@ -11392,6 +11406,7 @@
       <div class="hint" id="hint">배경을 바꿔가며 어떤 스티커든 붙여보세요! 끌어서 옮기고, 누르면 크기·회전·삭제할 수 있어요.</div>
       <div class="selbar" id="selbar">
         <div class="selrow">
+          <button class="act" id="editTxtBtn" title="글자 고치기" style="display:none">✏️</button>
           <button class="act" id="biggerBtn" title="크게">➕</button>
           <button class="act" id="smallerBtn" title="작게">➖</button>
           <button class="act" id="rotBtn" title="회전">🔄</button>
@@ -11405,6 +11420,13 @@
   </div>
   <div class="palcats" id="palcats"></div>
   <div class="palette" id="palette"></div>
+  <div class="tmodal" id="tmodal">
+    <div class="tcard">
+      <div class="ttitle">✏️ 글자를 써보세요</div>
+      <input id="tinput" type="text" maxlength="40" placeholder="예: 나비, 우리 정원, 사랑해" />
+      <div class="trow"><button id="tcancel">취소</button><button id="tok">확인</button></div>
+    </div>
+  </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
     <linearGradient id="stkRainbow" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#e5443b"/><stop offset=".2" stop-color="#f2892e"/><stop offset=".4" stop-color="#f6c81f"/><stop offset=".58" stop-color="#4fb84f"/><stop offset=".76" stop-color="#3a86d9"/><stop offset="1" stop-color="#8a4fc4"/>
@@ -11534,6 +11556,12 @@
   ];
   function applyColor(st){
     const el=st.__el; if(!el) return;
+    if(st.t==='t'){ const sp=el.querySelector('.txt'); if(!sp) return;
+      sp.classList.remove('txt-rainbow'); sp.style.color=''; const c=COLORS.find(x=>x.id===st.color);
+      if(!c || c.reset){ sp.style.color='#333'; return; }
+      if(c.rainbow){ sp.classList.add('txt-rainbow'); return; }
+      sp.style.color=c.fill; return;
+    }
     el.classList.remove('tint','tint-rainbow'); el.style.removeProperty('--tint'); el.style.removeProperty('--tintDark');
     if(st.t==='e') return;                    // 이모지는 색 변경 불가
     const c=COLORS.find(x=>x.id===st.color);
@@ -11551,8 +11579,10 @@
     });
   }
   function makeNode(st){
-    const el=document.createElement('div'); el.className='sticker '+(st.t==='e'?'emoji':'svg')+' pop';
-    el.innerHTML=innerHTMLfor(st); el.__st=st; st.__el=el; el.style.zIndex=st.z||(++zTop);
+    const el=document.createElement('div'); el.className='sticker '+(st.t==='e'?'emoji':st.t==='t'?'text':'svg')+' pop';
+    if(st.t==='t'){ const sp=document.createElement('span'); sp.className='txt'; sp.textContent=st.v; el.appendChild(sp); }
+    else { el.innerHTML=innerHTMLfor(st); }
+    el.__st=st; st.__el=el; el.style.zIndex=st.z||(++zTop);
     if(st.t==='s') markEyes(el);
     applyColor(st);
     const rz=document.createElement('div'); rz.className='rz'; rz.textContent='⤡';
@@ -11564,6 +11594,13 @@
     el.addEventListener('pointerdown',onStickerDown); return el;
   }
   function positionNode(st){ const rect=stage.getBoundingClientRect(); const size=st.size; const el=st.__el;
+    if(st.t==='t'){
+      el.style.width='auto'; el.style.height='auto'; el.style.fontSize=Math.round(size*0.6)+'px';
+      el.style.left=(st.fx*rect.width)+'px'; el.style.top=(st.fy*rect.height)+'px';
+      el.style.setProperty('--rot',(st.rot||0)+'deg'); el.style.setProperty('--fx',(st.flip?-1:1));
+      el.style.transform='translate(-50%,-50%) rotate('+(st.rot||0)+'deg) scaleX('+(st.flip?-1:1)+')';
+      return;
+    }
     el.style.width=size+'px'; el.style.height=size+'px'; el.style.fontSize=Math.round(size*0.82)+'px';
     el.style.left=Math.round(st.fx*rect.width - size/2)+'px'; el.style.top=Math.round(st.fy*rect.height - size/2)+'px';
     el.style.setProperty('--rot',(st.rot||0)+'deg'); el.style.setProperty('--fx',(st.flip?-1:1));
@@ -11595,7 +11632,8 @@
   }
   function markColor(){ [...colorRow.children].forEach(b=>b.classList.toggle('sel', sel && b.dataset.id===(sel.color||'orig'))); }
   function select(st){ deselect(); sel=st; st.__el.classList.add('sel'); selbar.classList.add('show');
-    if(st.t==='s'){ colorRow.classList.add('show'); markColor(); } else { colorRow.classList.remove('show'); } }
+    const eb=document.getElementById('editTxtBtn'); if(eb) eb.style.display = st.t==='t' ? 'inline-flex' : 'none';
+    if(st.t==='s'||st.t==='t'){ colorRow.classList.add('show'); markColor(); } else { colorRow.classList.remove('show'); } }
   function deselect(){ if(sel&&sel.__el) sel.__el.classList.remove('sel'); sel=null; selbar.classList.remove('show'); colorRow.classList.remove('show'); }
   document.getElementById('biggerBtn').onclick=()=>{ if(!sel)return; sel.size=Math.min(240,sel.size*1.18); positionNode(sel); save(); buzz(6); };
   document.getElementById('smallerBtn').onclick=()=>{ if(!sel)return; sel.size=Math.max(36,sel.size/1.18); positionNode(sel); save(); buzz(6); };
@@ -11706,6 +11744,27 @@
   function addPage(){ pages.splice(pageIdx+1,0,{bg:bg,stickers:[]}); goPage(pageIdx+1,1); buzz(10); flashHint(true); armHintHide(); }
   function delPage(){ if(pages.length<=1){ stickers.length=0; renderStickers(); save(); return; }
     pages.splice(pageIdx,1); if(pageIdx>=pages.length) pageIdx=pages.length-1; goPage(pageIdx); buzz(16); }
+
+  // ---- 글쓰기 ----
+  const tmodal=document.getElementById('tmodal'), tinput=document.getElementById('tinput');
+  let editing=null;
+  function openTextModal(st){ editing=st||null; tinput.value=st?st.v:''; tmodal.classList.add('show'); setTimeout(()=>{ tinput.focus(); tinput.select&&tinput.select(); },50); }
+  function closeTextModal(){ tmodal.classList.remove('show'); editing=null; }
+  function commitText(){ const v=(tinput.value||'').trim(); if(!v){ closeTextModal(); return; }
+    if(editing){ editing.v=v; const sp=editing.__el&&editing.__el.querySelector('.txt'); if(sp) sp.textContent=v; positionNode(editing); save(); }
+    else{ addTextSticker(v); }
+    closeTextModal(); }
+  function addTextSticker(v){ const rect=stage.getBoundingClientRect();
+    const size=Math.round(Math.min(rect.width,rect.height)*0.20);
+    const st={ t:'t', v:v, fx:0.5+(Math.random()*0.12-0.06), fy:0.42+(Math.random()*0.12-0.06),
+      size:Math.max(44,Math.min(size,150)), rot:0, flip:false, color:'orig', z:++zTop };
+    stickers.push(st); stage.appendChild(makeNode(st)); positionNode(st); select(st); updateCount(); save(); buzz(10); flashHint(false); }
+  document.getElementById('addTextBtn').onclick=()=>openTextModal(null);
+  document.getElementById('editTxtBtn').onclick=()=>{ if(sel&&sel.t==='t') openTextModal(sel); };
+  document.getElementById('tok').onclick=commitText;
+  document.getElementById('tcancel').onclick=closeTextModal;
+  tinput.addEventListener('keydown',e=>{ if(e.key==='Enter') commitText(); else if(e.key==='Escape') closeTextModal(); });
+  tmodal.addEventListener('pointerdown',e=>{ if(e.target===tmodal) closeTextModal(); });
 
   // init
   load();
