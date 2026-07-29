@@ -26,7 +26,7 @@
   /* view switching */
   .view{display:none;}
   .view.active{display:block;}
-  #player.active{display:flex;flex-direction:column;height:100vh;}
+  #player.active{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 
   /* ambient bugs */
   .ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
@@ -10761,7 +10761,7 @@
   .bar .chip b{color:#3a5a2a;}
   .bar button{border:2px solid #bcd3a6;background:#fff;color:#5a7a44;border-radius:10px;padding:4px 12px;font-weight:800;cursor:pointer;font-size:13px;}
   .bar button:active{transform:scale(.96);}
-  .mid{flex:1;position:relative;overflow:hidden;min-height:0;margin:6px 10px 4px;touch-action:none;}
+  .mid{flex:1;position:relative;overflow:hidden;min-height:0;margin:4px 3px 3px;touch-action:none;}
   .board{position:absolute;left:0;top:0;transform-origin:0 0;background:transparent;touch-action:none;}
   .cellgrid{position:absolute;inset:0;display:grid;}
   .cell{position:relative;}
@@ -10800,7 +10800,6 @@
 <body>
   <header>
     <h1>🌀 곤충 미로찾기</h1>
-    <div class="friend"><span class="fico" id="fico"></span><span><b id="fname">곤충</b> <small>가 길을 찾아요!</small></span></div>
   </header>
   <div class="seg" id="diffSeg">
     <button data-d="easy" class="on">쉬움</button>
@@ -11015,14 +11014,14 @@
   }
 
   function pickInsect(){ insect=INSECTS[(Math.random()*INSECTS.length)|0];
-    ficoEl.innerHTML=insect.svg; fnameEl.textContent=insect.name; playerEl.innerHTML=insect.svg;
+    if(ficoEl) ficoEl.innerHTML=insect.svg; if(fnameEl) fnameEl.textContent=insect.name; playerEl.innerHTML=insect.svg;
     boardEl.style.setProperty("--trail", hexA(insect.color,0.4));
   }
   function hexA(hex,a){ const h=hex.replace('#',''); const r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);
     return 'rgba('+r+','+g+','+b+','+a+')'; }
 
   function computeBase(){ const vpW=midEl.clientWidth||300, vpH=midEl.clientHeight||300;
-    const side=Math.max(120, Math.min(Math.min(vpW,vpH), 600)); baseCell=Math.max(8, Math.floor(side/N)); }
+    const side=Math.max(120, Math.min(Math.min(vpW,vpH), 760)); baseCell=Math.max(8, Math.floor(side/N)); }
   function relayout(){ cell=Math.max(6, Math.round(baseCell*Z)); const px=cell*N;
     boardEl.style.width=px+"px"; boardEl.style.height=px+"px";
     const wt=Math.max(2, Math.min(6, Math.round(cell/11))); boardEl.style.setProperty("--wall", wt+"px solid #6b4a2b");
@@ -11119,7 +11118,7 @@
     buildGrid(); fitView();
     startEl.style.left=(pc*cell)+"px"; startEl.style.top=(pr*cell)+"px";
     drawTrail();
-    hintEl.innerHTML=silh.name+" 모양 미로! 곤충을 <b>손가락으로 쓸어</b> 🏁까지 데려가요.";
+    hintEl.innerHTML="<b>"+insect.name+"</b>가 "+silh.name+" 미로 탈출! 손가락으로 쓸어 🏁까지 데려가요.";
   }
 
   function startTimerIfNeeded(){ if(running) return; running=true; t0=Date.now();
