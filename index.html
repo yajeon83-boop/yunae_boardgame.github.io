@@ -11340,7 +11340,8 @@
   .sticker svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
   .sticker.sel{outline:3px dashed #ff8a3d;outline-offset:3px;border-radius:10px;}
   .sticker .rz{position:absolute;right:-8px;bottom:-8px;width:28px;height:28px;border-radius:9px;background:#fff;border:2px solid #7bb45a;color:#3a7a2e;display:none;align-items:center;justify-content:center;font-size:16px;font-weight:900;cursor:nwse-resize;box-shadow:0 2px 6px rgba(0,0,0,.28);z-index:6;touch-action:none;}
-  .sticker.sel .rz{display:flex;}
+  .sticker .rot{position:absolute;left:50%;top:-30px;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid #5aa9e0;color:#2f7bb0;display:none;align-items:center;justify-content:center;font-size:15px;cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.28);z-index:6;touch-action:none;}
+  .sticker.sel .rz,.sticker.sel .rot{display:flex;}
   .sticker.pop{animation:pop .28s cubic-bezier(.34,1.56,.64,1);}
   @keyframes pop{0%{transform:scale(.2) rotate(var(--rot,0deg)) scaleX(var(--fx,1));}100%{}}
   .selbar{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:none;flex-direction:column;align-items:center;gap:5px;z-index:99999;background:rgba(255,255,255,.94);border-radius:14px;padding:6px 8px;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:96%;}
@@ -11557,6 +11558,9 @@
     const rz=document.createElement('div'); rz.className='rz'; rz.textContent='⤡';
     rz.addEventListener('pointerdown',ev=>startResize(ev,st));
     el.appendChild(rz);
+    const rot=document.createElement('div'); rot.className='rot'; rot.textContent='🔄';
+    rot.addEventListener('pointerdown',ev=>startRotate(ev,st));
+    el.appendChild(rot);
     el.addEventListener('pointerdown',onStickerDown); return el;
   }
   function positionNode(st){ const rect=stage.getBoundingClientRect(); const size=st.size; const el=st.__el;
@@ -11618,6 +11622,19 @@
   window.addEventListener('pointermove',e=>{ if(!resz) return; const dx=e.clientX-resz.cx, dy=e.clientY-resz.cy;
     let ns=2*Math.hypot(dx,dy)/1.414; ns=Math.max(36,Math.min(260,ns)); resz.st.size=ns; positionNode(resz.st); });
   window.addEventListener('pointerup',()=>{ if(resz){ save(); resz=null; } });
+
+  // ---- 위쪽 핸들로 직접 회전 ----
+  let rotd=null;
+  function startRotate(e,st){ e.stopPropagation(); e.preventDefault(); select(st); st.z=++zTop; st.__el.style.zIndex=st.z;
+    const rect=stage.getBoundingClientRect(); rotd={st, cx:rect.left+st.fx*rect.width, cy:rect.top+st.fy*rect.height};
+    try{ e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId); }catch(_){}
+  }
+  window.addEventListener('pointermove',e=>{ if(!rotd) return;
+    let ang=Math.atan2(e.clientY-rotd.cy, e.clientX-rotd.cx)*180/Math.PI + 90;   // 핸들이 손끝을 향하도록
+    ang=(ang%360+360)%360;
+    for(const s of [0,45,90,135,180,225,270,315,360]){ if(Math.abs(ang-s)<=6){ ang=s%360; break; } }  // 근처 각도 스냅
+    rotd.st.rot=Math.round(ang); positionNode(rotd.st); });
+  window.addEventListener('pointerup',()=>{ if(rotd){ save(); rotd=null; } });
   let sw=null;
   stage.addEventListener('pointerdown',e=>{ const empty=(e.target===stage||e.target.classList.contains('layer')||e.target.parentElement===bgLayer);
     if(empty){ deselect(); if(!animating) sw={x0:e.clientX,y0:e.clientY,dx:0,dy:0}; } });
