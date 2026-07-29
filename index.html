@@ -11289,7 +11289,7 @@
   .pbtn:active{transform:scale(.94);}
   .pbtn.add{background:#e3f6e0;border-color:#a9d9a0;color:#3a7a2e;}
   .pbtn.del{background:#ffe3dc;border-color:#f0b6a6;color:#b5502e;}
-  .pnum{font-size:14px;font-weight:800;color:#5a6a48;min-width:70px;text-align:center;}
+  .pnum{font-size:19px;font-weight:900;color:#3a5a2a;min-width:84px;text-align:center;}
   .tools .lbl{font-size:12.5px;color:#9a8a5f;font-weight:700;}
   .spacer{flex:1;}
   .tbtn{border:2px solid #d9c9a6;background:#fff8ea;border-radius:12px;padding:6px 10px;font-size:13px;font-weight:700;cursor:pointer;color:#7a6a44;}
@@ -11635,18 +11635,26 @@
     for(const s of [0,45,90,135,180,225,270,315,360]){ if(Math.abs(ang-s)<=6){ ang=s%360; break; } }  // 근처 각도 스냅
     rotd.st.rot=Math.round(ang); positionNode(rotd.st); });
   window.addEventListener('pointerup',()=>{ if(rotd){ save(); rotd=null; } });
-  let sw=null;
-  stage.addEventListener('pointerdown',e=>{ const empty=(e.target===stage||e.target.classList.contains('layer')||e.target.parentElement===bgLayer);
-    if(empty){ deselect(); if(!animating) sw={x0:e.clientX,y0:e.clientY,dx:0,dy:0}; } });
-  window.addEventListener('pointermove',e=>{ if(!sw||drag||animating) return; sw.dx=e.clientX-sw.x0; sw.dy=e.clientY-sw.y0;
-    if(Math.abs(sw.dx)>8 && Math.abs(sw.dx)>Math.abs(sw.dy)){ stage.style.transition='none';
-      stage.style.transform='translateX('+(sw.dx*0.28)+'px)'; stage.style.opacity=String(1-Math.min(0.3,Math.abs(sw.dx)/900)); } });
-  window.addEventListener('pointerup',()=>{ if(!sw) return; const dx=sw.dx,dy=sw.dy; sw=null;
-    const horiz=Math.abs(dx)>Math.abs(dy)*1.3 && Math.abs(dx)>60;
-    if(horiz){ const dir=dx<0?1:-1, target=pageIdx+dir;
-      if(target>=0 && target<pages.length){ stage.style.transform=''; stage.style.opacity=''; goPage(target,dir); return; } }
-    stage.style.transition='transform .18s ease, opacity .18s'; stage.style.transform=''; stage.style.opacity='';
-    setTimeout(()=>{ stage.style.transition=''; },190); });
+  // 빈 곳 탭 → 선택 해제 (페이지 넘김은 ◀▶ 버튼 사용)
+  stage.addEventListener('pointerdown',e=>{ const empty=(e.target===stage||e.target.classList.contains('layer')||e.target.parentElement===bgLayer); if(empty) deselect(); });
+
+  // ---- 두 손가락 핀치로 확대/축소 ----
+  const pts=new Map(); let pinch=null;
+  function isTouch(e){ return e.pointerType==='touch'; }
+  window.addEventListener('pointerdown',e=>{ if(!isTouch(e)) return; pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2){ drag=null; resz=null; rotd=null;      // 다른 제스처 취소
+      const a=[...pts.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1;
+      let target=sel; const mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2;
+      let u=document.elementFromPoint(mx,my); let se=u&&u.closest?u.closest('.sticker'):null;
+      if(!(se&&se.__st)){ u=document.elementFromPoint(a[0].x,a[0].y); se=u&&u.closest?u.closest('.sticker'):null; }
+      if(se&&se.__st) target=se.__st;
+      if(target){ select(target); pinch={st:target, d0:d, s0:target.size}; }
+    } }, true);
+  window.addEventListener('pointermove',e=>{ if(!isTouch(e)) return; if(pts.has(e.pointerId)) pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch && pts.size>=2){ const a=[...pts.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1;
+      let ns=pinch.s0 * d/pinch.d0; ns=Math.max(30,Math.min(300,ns)); pinch.st.size=ns; positionNode(pinch.st); } });
+  function endPinch(e){ if(isTouch(e)) pts.delete(e.pointerId); if(pinch && pts.size<2){ save(); pinch=null; } }
+  window.addEventListener('pointerup',endPinch); window.addEventListener('pointercancel',endPinch);
 
   document.getElementById('undoBtn').onclick=()=>{ if(!stickers.length)return; const st=stickers.pop(); st.__el&&st.__el.remove(); deselect(); updateCount(); save(); buzz(8); };
   let clearArm=false, clearT=null;
