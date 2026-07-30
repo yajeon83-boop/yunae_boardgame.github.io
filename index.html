@@ -9482,6 +9482,10 @@
   .stagebar .snum b{color:var(--hl-soft);font-size:19px;}
   .stagebar .best{font-family:"Jua";font-size:13px;color:#b07d1c;background:#fff6e0;border:2px solid #e7cf95;border-radius:999px;padding:6px 12px;}
   .status{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;flex:0 0 auto;font-family:"Jua";font-size:15px;}
+  .topinfo{display:flex;gap:8px;align-items:stretch;justify-content:center;flex-wrap:nowrap;flex:0 0 auto;margin:0 auto;max-width:99%;padding:0 4px;}
+  .topinfo .status{flex:0 0 auto;font-size:13.5px;}
+  .topinfo .chip{padding:3px 10px;}
+  .topinfo .message{margin:0;font-size:12px;padding:5px 10px;line-height:1.25;flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;}
   .chip{background:#fff;border:2px solid var(--line);border-radius:999px;padding:4px 13px;display:flex;gap:6px;align-items:center;}
 
   .mid{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;grid-area:board;}
@@ -9537,7 +9541,7 @@
   .cell.hintdot::after{content:"";position:absolute;inset:14%;border-radius:30%;border:4px solid #ffd84a;animation:hb .7s ease-in-out infinite;z-index:7;}
   @keyframes hb{0%,100%{opacity:.35;}50%{opacity:1;}}
 
-  .dpad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,46px);gap:5px;justify-content:center;flex:0 0 auto;margin:0 auto;}
+  .dpad{display:none;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,46px);gap:5px;justify-content:center;flex:0 0 auto;margin:0 auto;}
   .dpad button{font-family:"Jua";font-size:24px;border:none;border-radius:12px;background:#fff;border:2px solid var(--line);cursor:pointer;color:var(--hl-soft);
     display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
   .dpad .up{grid-column:2;grid-row:1;} .dpad .left{grid-column:1;grid-row:2;} .dpad .down{grid-column:2;grid-row:2;} .dpad .right{grid-column:3;grid-row:2;}
@@ -9561,7 +9565,7 @@
   @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}}
   .message{max-width:720px;margin-left:auto;margin-right:auto;}
   .stagenav{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;}
-  .stagebar{grid-area:nav;} .status{grid-area:stat;} .dpad{grid-area:pad;} .message{grid-area:msg;} .actions{grid-area:act;}
+  .stagebar{grid-area:nav;} .status{grid-area:stat;} .topinfo{grid-area:stat;} .dpad{grid-area:pad;} .message{grid-area:msg;} .actions{grid-area:act;}
   /* Wide screens: put controls beside the board so it fills the height (minimal whitespace) */
   @media (min-width:900px) and (min-aspect-ratio:7/5){
     #playView{display:grid;gap:9px 14px;height:100%;padding:0;
@@ -9657,7 +9661,7 @@
         <span class="best">🏆 <b id="bestNum">–</b></span>
       </div>
     </div>
-    <div class="status" id="status"></div>
+    <div class="topinfo"><div class="status" id="status"></div><div class="message good" id="message"></div></div>
     <div class="mid"><div class="board" id="board"></div></div>
     <div class="dpad">
       <button class="up" data-dir="1">▲</button>
@@ -9665,7 +9669,6 @@
       <button class="down" data-dir="0">▼</button>
       <button class="right" data-dir="2">▶</button>
     </div>
-    <div class="message good" id="message"></div>
     <div class="actions">
       <button class="btn ghost" id="undoBtn">↩ 무르기</button>
       <button class="btn ghost" id="hintBtn">💡 힌트</button>
