@@ -11680,11 +11680,12 @@
   // ---- 모서리 핸들로 직접 확대/축소 ----
   let resz=null;
   function startResize(e,st){ e.stopPropagation(); e.preventDefault(); select(st); st.z=++zTop; st.__el.style.zIndex=st.z;
-    const rect=stage.getBoundingClientRect(); resz={st, cx:rect.left+st.fx*rect.width, cy:rect.top+st.fy*rect.height};
+    resz={st, x0:e.clientX, y0:e.clientY, s0:st.size};        // 누른 지점 기준 상대 드래그
     try{ e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId); }catch(_){}
   }
-  window.addEventListener('pointermove',e=>{ if(!resz) return; const dx=e.clientX-resz.cx, dy=e.clientY-resz.cy;
-    let ns=2*Math.hypot(dx,dy)/1.414; ns=Math.max(36,Math.min(260,ns)); resz.st.size=ns; positionNode(resz.st); });
+  window.addEventListener('pointermove',e=>{ if(!resz) return;
+    const d=(e.clientX-resz.x0)+(e.clientY-resz.y0);          // 오른쪽아래로 끌면 +, 왼쪽위로 -
+    let ns=resz.s0 + d; ns=Math.max(30,Math.min(300,ns)); resz.st.size=ns; positionNode(resz.st); });
   window.addEventListener('pointerup',()=>{ if(resz){ save(); resz=null; } });
 
   // ---- 위쪽 핸들로 직접 회전 ----
