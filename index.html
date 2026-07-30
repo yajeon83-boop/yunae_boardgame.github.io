@@ -11359,6 +11359,8 @@
   @keyframes pop{0%{transform:scale(.2) rotate(var(--rot,0deg)) scaleX(var(--fx,1));}100%{}}
   .selbar{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:none;flex-direction:column;align-items:center;gap:5px;z-index:99999;background:rgba(255,255,255,.94);border-radius:14px;padding:6px 8px;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:96%;}
   .selbar.show{display:flex;}
+  .selgrip{align-self:stretch;text-align:center;font-size:11.5px;font-weight:800;color:#a89877;cursor:grab;padding:0 0 3px;user-select:none;-webkit-user-select:none;touch-action:none;letter-spacing:1px;}
+  .selgrip:active{cursor:grabbing;}
   .selrow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
   .selrow.colors{display:none;} .selrow.colors.show{display:flex;}
   .selbar button.act{border:none;background:#f0e6d0;border-radius:10px;width:42px;height:42px;font-size:20px;cursor:pointer;}
@@ -11405,6 +11407,7 @@
       <div class="layer" id="bgLayer"></div>
       <div class="hint" id="hint">배경을 바꿔가며 어떤 스티커든 붙여보세요! 끌어서 옮기고, 누르면 크기·회전·삭제할 수 있어요.</div>
       <div class="selbar" id="selbar">
+        <div class="selgrip" id="selgrip">⠿ 옮기기 ⠿</div>
         <div class="selrow">
           <button class="act" id="editTxtBtn" title="글자 고치기" style="display:none">✏️</button>
           <button class="act" id="biggerBtn" title="크게">➕</button>
@@ -11470,6 +11473,9 @@
   const PONDSNAIL='<g><path d="M30 82 Q52 92 70 82" stroke="#c9a86a" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M34 80 Q18 78 20 62 Q22 44 46 44 Q68 44 68 62 Q68 78 50 78 Q38 78 40 66 Q42 56 52 58 Q59 60 58 66" fill="none" stroke="#8a6a3e" stroke-width="7" stroke-linecap="round"/><circle cx="70" cy="80" r="3" fill="#5a4326"/><path d="M72 78 Q78 70 76 64 M74 80 Q82 76 84 70" stroke="#8a6a3e" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>';
   const PIRANHA='<g><path d="M22 50 Q32 30 56 32 Q80 34 86 50 Q80 66 56 68 Q32 70 22 50 Z" fill="#9aa6ad" stroke="#5c666c" stroke-width="2.2"/><path d="M56 40 Q78 43 82 50 Q78 57 56 60 Z" fill="#e0863a"/><path d="M22 50 L6 40 L11 50 L6 60 Z" fill="#8a969c" stroke="#5c666c" stroke-width="1.6"/><path d="M38 63 l4 5 l4 -5 l4 5 l4 -5" stroke="#fff" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="70" cy="44" r="4.5" fill="#fff"/><circle cx="70.5" cy="44" r="2.4" fill="#1a1a1a"/></g>';
   const MORAY='<g><path d="M28 88 Q8 78 18 56 Q28 38 48 40 Q68 42 70 26 Q71 15 61 13 Q66 21 57 29 Q47 37 38 35" fill="none" stroke="#5a8a3a" stroke-width="12" stroke-linecap="round"/><ellipse cx="61" cy="20" rx="10" ry="8" fill="#6aa048"/><circle cx="64" cy="17" r="2.2" fill="#16240c"/><path d="M52 24 Q61 28 69 23" stroke="#2a4018" stroke-width="2" fill="none"/><path d="M53 24 l2 3 M58 26 l1 3 M64 25 l1 3" stroke="#fff" stroke-width="1.3"/></g>';
+  const MEERKAT='<g><ellipse cx="50" cy="68" rx="16" ry="24" fill="#c9a06a"/><ellipse cx="50" cy="72" rx="9.5" ry="16" fill="#e2c496"/><path d="M40 60 Q35 76 39 88 M60 60 Q65 76 61 88" stroke="#b0895a" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M52 90 Q58 98 66 92" stroke="#b0895a" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="50" cy="30" r="13" fill="#cfa870"/><circle cx="40" cy="20" r="4.5" fill="#b0895a"/><circle cx="60" cy="20" r="4.5" fill="#b0895a"/><ellipse cx="43" cy="30" rx="4.2" ry="5" fill="#2e1e0e"/><ellipse cx="57" cy="30" rx="4.2" ry="5" fill="#2e1e0e"/><circle cx="43.6" cy="29" r="1.5" fill="#fff"/><circle cx="57.6" cy="29" r="1.5" fill="#fff"/><ellipse cx="50" cy="37" rx="3" ry="2.2" fill="#2a1a0c"/><path d="M46 40 Q50 43 54 40" stroke="#2a1a0c" stroke-width="1.6" fill="none"/></g>';
+  const FENNEC='<g><path d="M30 32 Q20 4 42 24 Z" fill="#f0dcae" stroke="#cbb07a" stroke-width="1.6"/><path d="M70 32 Q80 4 58 24 Z" fill="#f0dcae" stroke="#cbb07a" stroke-width="1.6"/><path d="M31 30 Q26 12 39 25" fill="#e6a898"/><path d="M69 30 Q74 12 61 25" fill="#e6a898"/><ellipse cx="50" cy="48" rx="22" ry="18" fill="#f2e2ba"/><path d="M50 44 L37 60 L63 60 Z" fill="#f8eed6"/><ellipse cx="42" cy="46" rx="3.6" ry="4.2" fill="#2a1a0c"/><ellipse cx="58" cy="46" rx="3.6" ry="4.2" fill="#2a1a0c"/><circle cx="43" cy="45" r="1.3" fill="#fff"/><circle cx="59" cy="45" r="1.3" fill="#fff"/><ellipse cx="50" cy="58" rx="3" ry="2.2" fill="#3a2414"/><path d="M46 62 Q50 66 54 62" stroke="#cbb07a" stroke-width="1.4" fill="none"/></g>';
+  const RATTLE='<g><path d="M50 80 Q22 80 22 56 Q22 34 50 34 Q76 34 76 54 Q76 70 54 70 Q40 70 43 57" fill="none" stroke="#cCa24a" stroke-width="13" stroke-linecap="round"/><path d="M50 80 Q22 80 22 56 Q22 34 50 34 Q76 34 76 54" fill="none" stroke="#8a6a2a" stroke-width="4" stroke-dasharray="4 9" opacity=".6"/><ellipse cx="45" cy="52" rx="9.5" ry="7.5" fill="#d4ad55"/><circle cx="41" cy="50" r="2.1" fill="#171106"/><path d="M45 57 q4 3 8 -0.5" stroke="#171106" stroke-width="1.6" fill="none"/><path d="M45 59 l-1 5 l2 -1 l1 3" stroke="#c0392b" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M76 50 l7 -3 l-2 5 l6 -1 l-3 5" fill="#c9c0ac" stroke="#8a8070" stroke-width="1.2" stroke-linejoin="round"/></g>';
   const E=v=>({t:'e',v}); const S=v=>({t:'s',v:SV(v)});
   // ===== 스티커 세트 (배경과 무관, 어디서든 사용) =====
   const CATS={
@@ -11482,6 +11488,8 @@
     '⛰️땅속':[S(ANTNEST),S(CHAMBER),S(TUNNEL),S(GHLEG),S(LEAFBIT),S(GRUB),S(CATER),S(PILL),
               E('🐜'),E('🪱'),E('🐛'),E('🪲'),E('🦗'),E('🕷️'),E('🐭'),E('🐍'),E('🦔'),E('🕳️'),
               E('🌰'),E('🌾'),E('🍂'),E('🍃'),E('🍄'),E('🥜'),E('🫘'),E('🍞'),E('🪨')],
+    '🏜️사막':[S(SCORP),S(MEERKAT),S(FENNEC),S(RATTLE),S(LIZARD),
+             E('🦂'),E('🐫'),E('🐪'),E('🦎'),E('🐍'),E('🐢'),E('🦔'),E('🪲'),E('🐜'),E('🌵'),E('🪨'),E('☀️'),E('🦅'),E('🕷️')],
     '🌿식물':[E('🌳'),E('🌲'),E('🌴'),E('🪴'),E('🌿'),E('🍀'),E('🌱'),E('🍃'),E('🍂'),E('🎋'),E('🌵'),E('🍄'),E('🪵'),E('🪷')],
     '🌸꽃':[E('🌸'),E('🌺'),E('🌻'),E('🌷'),E('🌹'),E('🌼'),E('💐'),E('🏵️')],
     '✨꾸미기':[S(HONEYPOT),S(HIVE),S(STARFISH),E('⭐'),E('✨'),E('🌟'),E('❤️'),E('💛'),E('💚'),E('💙'),E('💜'),E('🌈'),E('🎀'),E('☀️'),E('🌙'),E('☁️'),E('⛅'),E('🫧'),E('💧'),E('🔵'),E('🟢'),E('🟤'),E('⚪'),E('🪨'),E('🐚')]
@@ -11550,6 +11558,7 @@
     {id:'violet', fill:'#8a4fc4', dark:'#5e2f8f'},
     {id:'sky', fill:'#5ec8f0', dark:'#2f93c0'},
     {id:'mint', fill:'#48d0b0', dark:'#23997e'},
+    {id:'gray', fill:'#9aa0a6', dark:'#6b7075'},
     {id:'black', fill:'#333333', dark:'#000000'},
     {id:'white', fill:'#ffffff', dark:'#cfcfcf'},
     {id:'rainbow', rainbow:true}
@@ -11572,6 +11581,8 @@
   function markEyes(el){
     el.querySelectorAll('svg *').forEach(n=>{
       const f=(n.getAttribute('fill')||'').toLowerCase();
+      // 작은 원은 눈동자/하이라이트 → 색 제외
+      if(n.tagName && n.tagName.toLowerCase()==='circle'){ const r=parseFloat(n.getAttribute('r')||'0'); if(r>0 && r<=5){ n.classList.add('ey'); return; } }
       if(!f||f==='none') return;
       if(f==='#fff'||f==='#ffffff'||f==='white'){ n.classList.add('ey'); return; }   // 흰자·하이라이트
       const m=f.match(/^#([0-9a-f]{6})$/); if(m){ const r=parseInt(m[1].slice(0,2),16),g=parseInt(m[1].slice(2,4),16),b=parseInt(m[1].slice(4,6),16);
@@ -11631,10 +11642,25 @@
       colorRow.appendChild(btn); });
   }
   function markColor(){ [...colorRow.children].forEach(b=>b.classList.toggle('sel', sel && b.dataset.id===(sel.color||'orig'))); }
-  function select(st){ deselect(); sel=st; st.__el.classList.add('sel'); selbar.classList.add('show');
+  function select(st){ deselect(); sel=st; st.__el.classList.add('sel'); selbar.classList.add('show'); placeSelbar();
     const eb=document.getElementById('editTxtBtn'); if(eb) eb.style.display = st.t==='t' ? 'inline-flex' : 'none';
     if(st.t==='s'||st.t==='t'){ colorRow.classList.add('show'); markColor(); } else { colorRow.classList.remove('show'); } }
   function deselect(){ if(sel&&sel.__el) sel.__el.classList.remove('sel'); sel=null; selbar.classList.remove('show'); colorRow.classList.remove('show'); }
+  // ---- 조절 박스 드래그 이동 ----
+  let sbPos=null, sbDrag=null;
+  function placeSelbar(){ if(sbPos){ selbar.style.left=sbPos.left+'px'; selbar.style.top=sbPos.top+'px'; selbar.style.bottom='auto'; selbar.style.transform='none'; }
+    else { selbar.style.left='50%'; selbar.style.top='auto'; selbar.style.bottom='8px'; selbar.style.transform='translateX(-50%)'; } }
+  (function(){ const grip=document.getElementById('selgrip'); if(!grip) return;
+    grip.addEventListener('pointerdown',e=>{ e.stopPropagation(); e.preventDefault();
+      const sr=selbar.getBoundingClientRect(); sbDrag={ ox:e.clientX-sr.left, oy:e.clientY-sr.top, w:sr.width, h:sr.height };
+      try{ grip.setPointerCapture(e.pointerId); }catch(_){}
+    });
+    window.addEventListener('pointermove',e=>{ if(!sbDrag) return; const st=stage.getBoundingClientRect();
+      let left=e.clientX-st.left-sbDrag.ox, top=e.clientY-st.top-sbDrag.oy;
+      left=Math.max(2,Math.min(st.width-sbDrag.w-2,left)); top=Math.max(2,Math.min(st.height-sbDrag.h-2,top));
+      sbPos={left,top}; placeSelbar(); });
+    window.addEventListener('pointerup',()=>{ sbDrag=null; });
+  })();
   document.getElementById('biggerBtn').onclick=()=>{ if(!sel)return; sel.size=Math.min(240,sel.size*1.18); positionNode(sel); save(); buzz(6); };
   document.getElementById('smallerBtn').onclick=()=>{ if(!sel)return; sel.size=Math.max(36,sel.size/1.18); positionNode(sel); save(); buzz(6); };
   document.getElementById('rotBtn').onclick=()=>{ if(!sel)return; sel.rot=((sel.rot||0)+22.5)%360; positionNode(sel); save(); buzz(6); };
