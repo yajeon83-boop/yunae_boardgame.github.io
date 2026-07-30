@@ -6157,6 +6157,13 @@
   .status,.scorebar,.turnbar{font-size:15px!important;margin:0!important;}
   .chip{font-size:14px!important;padding:6px 13px!important;}
   .chip .cdot,.disc-mini{width:17px!important;height:17px!important;}
+  /* 큰 화면: 카드 작게, 게임판 크게 */
+  @media (min-width:560px),(min-height:740px){
+    .card{width:clamp(60px,8.5vw,80px);}
+    .card .cname{font-size:11px;}
+    .board{width:min(94vw,calc(100dvh - 330px),700px);height:min(94vw,calc(100dvh - 330px),700px);}
+    .toprow,.botrow{max-width:min(94vw,calc(100dvh - 330px),700px);}
+  }
 </style>
 </head>
 <body>
@@ -7671,8 +7678,11 @@
   .cdot{width:15px;height:15px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,.15);}
 
   .mid{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:100%;}
-  .board{position:relative;width:min(96vw,calc(100dvh - 330px),460px);height:min(96vw,calc(100dvh - 330px),460px);
+  .board{position:relative;width:min(96vw,calc(100dvh - 250px),500px);height:min(96vw,calc(100dvh - 250px),500px);
     background:var(--grid);border-radius:14px;box-shadow:0 10px 24px rgba(70,80,30,.25);overflow:hidden;touch-action:none;}
+  @media (min-width:560px),(min-height:740px){
+    .board{width:min(96vw,calc(100dvh - 230px),640px);height:min(96vw,calc(100dvh - 230px),640px);}
+  }
   .grid{position:absolute;inset:0;display:grid;}
   .gcell{border:1px solid var(--grid);}
   .layer{position:absolute;inset:0;}
@@ -7688,7 +7698,7 @@
   .cat.sel::after{content:"";position:absolute;inset:4%;border-radius:50%;box-shadow:0 0 0 3px #ffcf3a,0 0 12px 3px rgba(255,207,58,.75);pointer-events:none;animation:selp 1s ease-in-out infinite;}
   @keyframes selp{0%,100%{opacity:.85;}50%{opacity:1;}}
 
-  .dpad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:6px;width:min(70vw,206px);margin:0 auto;flex:0 0 auto;}
+  .dpad{display:none;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:6px;width:min(70vw,206px);margin:0 auto;flex:0 0 auto;}
   .dpad button{font-size:22px;border:none;border-radius:14px;background:#fff;border:2px solid var(--line);color:var(--hl-soft);cursor:pointer;padding:7px 0;box-shadow:0 3px 0 #cdd9b7;}
   .dpad button:active{transform:translateY(2px);box-shadow:none;}
   .dpad .up{grid-column:2;grid-row:1;} .dpad .left{grid-column:1;grid-row:2;} .dpad .down{grid-column:2;grid-row:2;} .dpad .right{grid-column:3;grid-row:2;}
