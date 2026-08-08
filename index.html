@@ -123,6 +123,10 @@
   .game-card.coloring .cdesc{color:#6a4a54;}
   .game-card.coloring .cgo{background:#f2903c;color:#fff;box-shadow:0 3px 0 #c96f1f;}
   .game-card.coloring::after{content:"🖍️";position:absolute;right:-4px;bottom:-12px;font-size:80px;opacity:.16;transform:rotate(-12deg);}
+  .game-card.fireworks{background:linear-gradient(160deg,#2a2350,#4a2a6a 55%,#7a2a5a);color:#fff;border:2px solid #5a3a8a;}
+  .game-card.fireworks .cdesc{color:#eadcff;}
+  .game-card.fireworks .cgo{background:#ffd23d;color:#5a2a10;box-shadow:0 3px 0 #c79a1f;}
+  .game-card.fireworks::after{content:"🎆";position:absolute;right:-4px;bottom:-12px;font-size:82px;opacity:.2;transform:rotate(-8deg);}
 
   .home-foot{text-align:center;margin-top:24px;color:var(--ink-soft);font-size:12px;opacity:.8;}
 
@@ -342,7 +346,15 @@
           <div class="ic">🖍️</div>
           <div class="ct">
             <div class="cname">곤충 색칠놀이</div>
-            <div class="cdesc">왼쪽 <b>예시</b>를 보고 색칠해요! 나비·전갈·뱀·카멜레온 등 <b>18종</b>과 여러 곤충이 한 장면에 나오는 <b>숲속 나라·곤충 씨름</b> 도면까지 <b>총 20가지</b>. 칠하면 <b>뾱!</b> 소리·<b>🌈레인보우 물감</b>. 그림마다 저장돼요. <span class="orig">오리지널 창작</span></div>
+            <div class="cdesc">왼쪽 <b>예시</b>를 보고 색칠해요! 나비·전갈·뱀·카멜레온 등 <b>18종</b>과 여러 곤충이 나오는 <b>숲속 나라·곤충 씨름</b> 장면까지 <b>총 20가지</b>. 칠하면 <b>뾱!</b> 소리·<b>🌈레인보우 물감</b>. 그림마다 저장. <span class="orig">오리지널 창작</span></div>
+          </div>
+          <div class="cgo">놀러가기 →</div>
+        </button>
+        <button class="game-card fireworks" data-game="fireworks" aria-label="곤충 불꽃놀이 열기">
+          <div class="ic">🎆</div>
+          <div class="ct">
+            <div class="cname">곤충 불꽃놀이</div>
+            <div class="cdesc">봄·여름·가을·겨울 <b>배경</b>을 고르고, <b>곤충 모양</b> 불꽃과 <b>색</b>을 골라 하늘에 톡톡! <b>🎆실행</b>하면 곤충 불꽃이 <b>팡팡</b> 터져요(터지는 소리까지!). <span class="orig">오리지널 창작</span></div>
           </div>
           <div class="cgo">놀러가기 →</div>
         </button>
@@ -13468,6 +13480,318 @@ renderPick(); renderPal(); loadArt(cur);
 </body></html>
 </template>
 
+  <template id="tpl-fireworks"><!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>곤충 불꽃놀이</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+    background:#141225;color:#fff;display:flex;flex-direction:column;min-height:100%;overflow:hidden;
+    user-select:none;-webkit-user-select:none;}
+
+  .bar{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:6px 10px;flex:0 0 auto;
+    scrollbar-width:none;background:#1d1b30;}
+  .bar::-webkit-scrollbar{display:none;}
+  .bar .lb{font-size:12px;font-weight:800;color:#b9b3d6;flex:0 0 auto;margin-right:2px;}
+  .chip{flex:0 0 auto;border:2px solid #3a3556;background:#26233c;color:#eee;border-radius:12px;
+    padding:6px 11px;font-size:14px;font-weight:800;cursor:pointer;transition:.12s;display:inline-flex;align-items:center;gap:4px;}
+  .chip.on{border-color:#ffd23d;background:#3a3320;color:#ffe38a;box-shadow:0 0 0 2px rgba(255,210,61,.25);}
+  .em{flex:0 0 auto;width:44px;height:44px;border-radius:12px;border:2px solid #3a3556;background:#26233c;
+    font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;}
+  .em.on{border-color:#ffd23d;box-shadow:0 0 0 2px rgba(255,210,61,.3);transform:translateY(-2px);}
+  .sw{flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:3px solid #2a2740;cursor:pointer;transition:.12s;}
+  .sw.on{transform:scale(1.2);border-color:#fff;box-shadow:0 0 0 2px #ffd23d;}
+  .sw.rb{background:conic-gradient(from 0deg,#ff5b5b,#ff9f43,#ffd93d,#4cc46a,#35d0c0,#5ec6ff,#4a8ef0,#a97bf0,#ff8ec9,#ff5b5b);}
+
+  .stage{flex:1;position:relative;min-height:0;overflow:hidden;}
+  .bg{position:absolute;inset:0;}
+  .bg svg{width:100%;height:100%;display:block;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;}
+  .hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:13px;color:#fff;
+    text-shadow:0 1px 4px rgba(0,0,0,.6);pointer-events:none;opacity:.92;}
+
+  .tools{display:flex;gap:8px;justify-content:center;align-items:center;padding:8px 10px;flex:0 0 auto;background:#1d1b30;}
+  .go{border:none;background:linear-gradient(180deg,#ff8a3d,#ff5b5b);color:#fff;font-weight:900;font-size:17px;
+    border-radius:14px;padding:11px 26px;cursor:pointer;box-shadow:0 4px 0 #c23a2a;display:inline-flex;align-items:center;gap:6px;}
+  .go:active{transform:translateY(2px);box-shadow:0 2px 0 #c23a2a;}
+  .go[disabled]{filter:grayscale(.5) brightness(.8);}
+  .clr{border:2px solid #4a4468;background:#26233c;color:#d9d3f0;font-weight:800;font-size:14px;border-radius:12px;padding:9px 14px;cursor:pointer;}
+
+  .rulesFab{display:none;}
+  .rov{position:fixed;inset:0;background:rgba(10,8,20,.62);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  .rov.show{display:flex;}
+  .rcard{background:#241f3a;border:1px solid #3a3556;border-radius:20px;padding:20px 22px;max-width:420px;box-shadow:0 14px 44px rgba(0,0,0,.5);}
+  .rcard h2{margin:0 0 10px;color:#ffd23d;font-size:20px;}
+  .rcard p{margin:7px 0;font-size:14.5px;line-height:1.6;color:#e6e0ff;}
+  .rcard button{margin-top:14px;width:100%;border:none;background:#ff7a3d;color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:11px;cursor:pointer;}
+</style></head>
+<body>
+  <div class="bar" id="seasonBar"><span class="lb">배경</span></div>
+  <div class="bar" id="shapeBar"><span class="lb">불꽃 곤충</span></div>
+  <div class="bar" id="colorBar"><span class="lb">불꽃 색</span></div>
+
+  <div class="stage" id="stage">
+    <div class="bg" id="bg"></div>
+    <canvas id="cv"></canvas>
+    <div class="hint" id="hint">하늘을 톡 눌러 불꽃을 놓고 🎆실행!</div>
+  </div>
+
+  <div class="tools">
+    <button class="clr" id="clrBtn">🧹 지우기</button>
+    <button class="go" id="goBtn">🎆 실행</button>
+  </div>
+
+  <button class="rulesFab" id="rulesFab"></button>
+  <div class="rov" id="rov"><div class="rcard">
+    <h2>🎆 곤충 불꽃놀이</h2>
+    <p>1) <b>배경</b>에서 봄·여름·가을·겨울을 골라요.</p>
+    <p>2) <b>불꽃 곤충</b> 모양과 <b>불꽃 색</b>을 골라요.</p>
+    <p>3) 하늘을 <b>톡톡</b> 눌러 불꽃을 여러 개 놓아요(모양·색 바꿔가며).</p>
+    <p>4) <b>🎆실행</b>을 누르면 불꽃이 <b>팡팡!</b> 터져요. <b>🧹지우기</b>로 다시 꾸며요.</p>
+    <button id="rovClose">알았어요!</button>
+  </div></div>
+
+<script>
+/* ===== 진동 & 소리 ===== */
+let hap=true;
+window.addEventListener('message',e=>{const d=e.data; if(d&&d.type==='haptics') hap=!!d.on;});
+function buzz(p){ if(!hap) return; try{ if(window.parent&&window.parent!==window){ parent.postMessage({type:'buzz',p:p},'*'); return; } }catch(e){} try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+
+let _ac=null,_noise=null;
+function ac(){ if(!_ac){ try{ _ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(_ac&&_ac.state==='suspended') _ac.resume(); return _ac; }
+function noiseBuf(a){ if(_noise) return _noise; const n=Math.floor(a.sampleRate*0.5); const b=a.createBuffer(1,n,a.sampleRate); const d=b.getChannelData(0); for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n); _noise=b; return b; }
+function boom(){ /* 팡! 터지는 소리 */
+  if(!hap) return; const a=ac(); if(!a) return;
+  try{
+    const t=a.currentTime;
+    const src=a.createBufferSource(); src.buffer=noiseBuf(a);
+    const bp=a.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1100; bp.Q.value=0.6;
+    const g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+    src.connect(bp); bp.connect(g); g.connect(a.destination); src.start(t); src.stop(t+0.5);
+    const o=a.createOscillator(),og=a.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(170,t); o.frequency.exponentialRampToValueAtTime(55,t+0.2);
+    og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.5,t+0.01); og.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+    o.connect(og); og.connect(a.destination); o.start(t); o.stop(t+0.32);
+    for(let i=0;i<6;i++){ const tt=t+0.05+Math.random()*0.32; const c=a.createOscillator(),cg=a.createGain();
+      c.type='square'; c.frequency.value=700+Math.random()*1700;
+      cg.gain.setValueAtTime(0.0001,tt); cg.gain.exponentialRampToValueAtTime(0.1,tt+0.004); cg.gain.exponentialRampToValueAtTime(0.0001,tt+0.05);
+      c.connect(cg); cg.connect(a.destination); c.start(tt); c.stop(tt+0.06); }
+  }catch(e){}
+}
+function whoosh(){ if(!hap) return; const a=ac(); if(!a) return; try{ const t=a.currentTime;
+  const o=a.createOscillator(),g=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(760,t+0.45);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.08,t+0.05); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+0.5);}catch(e){} }
+
+/* ===== 계절 배경 ===== */
+const SEASONS=[
+ {id:"spring",name:"봄",emoji:"🌸",svg:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+  <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b4c86"/><stop offset="0.5" stop-color="#e79ab5"/><stop offset="1" stop-color="#ffd9c0"/></linearGradient></defs>
+  <rect width="400" height="300" fill="url(#sk)"/>
+  <g fill="#fff" opacity="0.75"><circle cx="40" cy="28" r="1.5"/><circle cx="130" cy="18" r="1"/><circle cx="300" cy="24" r="1.4"/><circle cx="360" cy="46" r="1"/><circle cx="220" cy="34" r="1"/></g>
+  <path d="M0 220 C 80 190 160 212 240 200 C 320 190 380 212 400 200 L400 300 L0 300Z" fill="#8fc76a"/>
+  <path d="M0 248 C 90 226 180 248 260 240 C 330 233 390 248 400 242 L400 300 L0 300Z" fill="#6fb050"/>
+  <g><rect x="58" y="206" width="10" height="42" fill="#7a5230"/><circle cx="63" cy="200" r="22" fill="#f7b8d0"/><circle cx="46" cy="210" r="15" fill="#f7b8d0"/><circle cx="80" cy="210" r="15" fill="#f6a9c6"/></g>
+  <g><rect x="322" y="210" width="10" height="40" fill="#7a5230"/><circle cx="327" cy="204" r="20" fill="#f6a9c6"/><circle cx="312" cy="214" r="13" fill="#f7b8d0"/><circle cx="342" cy="214" r="13" fill="#f7b8d0"/></g>
+  <g fill="#ff8ec9"><circle cx="150" cy="272" r="5"/><circle cx="200" cy="280" r="5"/><circle cx="250" cy="270" r="5"/><circle cx="110" cy="284" r="5"/></g></svg>`},
+ {id:"summer",name:"여름",emoji:"🌿",svg:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+  <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#152447"/><stop offset="0.55" stop-color="#2a5d6e"/><stop offset="1" stop-color="#5a8a4a"/></linearGradient></defs>
+  <rect width="400" height="300" fill="url(#sk)"/>
+  <circle cx="330" cy="46" r="20" fill="#fdf3c0" opacity="0.9"/>
+  <g fill="#fff" opacity="0.7"><circle cx="40" cy="30" r="1.4"/><circle cx="90" cy="20" r="1"/><circle cx="200" cy="26" r="1.3"/><circle cx="260" cy="40" r="1"/></g>
+  <path d="M0 210 C 70 186 150 206 230 198 C 300 191 370 208 400 198 L400 300 L0 300Z" fill="#2f7a44"/>
+  <g fill="#245f36"><path d="M40 210 L64 150 L88 210Z"/><path d="M78 214 L104 142 L130 214Z"/><path d="M280 212 L308 148 L336 212Z"/><path d="M330 214 L352 160 L374 214Z"/></g>
+  <path d="M0 250 C 90 232 180 250 260 244 C 330 239 390 250 400 246 L400 300 L0 300Z" fill="#1f5730"/>
+  <g fill="#ffe36a"><circle cx="150" cy="176" r="2.2"/><circle cx="188" cy="196" r="2"/><circle cx="120" cy="205" r="2"/><circle cx="230" cy="185" r="2"/></g></svg>`},
+ {id:"autumn",name:"가을",emoji:"🍁",svg:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+  <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a5e"/><stop offset="0.5" stop-color="#d8814a"/><stop offset="1" stop-color="#f4c268"/></linearGradient></defs>
+  <rect width="400" height="300" fill="url(#sk)"/>
+  <circle cx="70" cy="60" r="26" fill="#ffdf9a" opacity="0.85"/>
+  <path d="M0 214 C 80 190 160 210 240 200 C 320 191 380 210 400 202 L400 300 L0 300Z" fill="#b5793a"/>
+  <g><rect x="300" y="196" width="10" height="46" fill="#6e4a26"/><circle cx="305" cy="190" r="22" fill="#e0733a"/><circle cx="288" cy="200" r="15" fill="#e8933a"/><circle cx="322" cy="200" r="15" fill="#d1552f"/></g>
+  <g><rect x="66" y="198" width="9" height="42" fill="#6e4a26"/><circle cx="70" cy="192" r="19" fill="#e8933a"/><circle cx="56" cy="202" r="13" fill="#d1552f"/><circle cx="84" cy="202" r="13" fill="#e0733a"/></g>
+  <path d="M0 250 C 90 232 180 250 260 244 C 330 239 390 250 400 246 L400 300 L0 300Z" fill="#8a5a2b"/>
+  <g fill="#d1552f"><circle cx="160" cy="266" r="4"/><circle cx="210" cy="274" r="4"/><circle cx="250" cy="264" r="4"/></g></svg>`},
+ {id:"winter",name:"겨울",emoji:"❄️",svg:`<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+  <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1a38"/><stop offset="0.55" stop-color="#2c4670"/><stop offset="1" stop-color="#a7c4dd"/></linearGradient></defs>
+  <rect width="400" height="300" fill="url(#sk)"/>
+  <circle cx="320" cy="50" r="20" fill="#eef4ff" opacity="0.9"/>
+  <g fill="#fff" opacity="0.85"><circle cx="40" cy="26" r="1.6"/><circle cx="110" cy="18" r="1.1"/><circle cx="180" cy="30" r="1.3"/><circle cx="250" cy="22" r="1"/><circle cx="360" cy="40" r="1.2"/></g>
+  <path d="M0 224 C 90 204 180 222 260 214 C 330 208 390 222 400 216 L400 300 L0 300Z" fill="#dbe8f2"/>
+  <g fill="#2e5a3e"><path d="M60 226 L84 156 L108 226Z"/><path d="M66 210 L84 168 L102 210Z" fill="#367048"/><rect x="80" y="226" width="8" height="12" fill="#6e4a26"/>
+   <path d="M300 228 L326 150 L352 228Z"/><path d="M306 210 L326 162 L346 210Z" fill="#367048"/><rect x="322" y="228" width="8" height="12" fill="#6e4a26"/></g>
+  <path d="M0 252 C 90 236 180 252 260 246 C 330 241 390 252 400 248 L400 300 L0 300Z" fill="#eef4fb"/>
+  <g fill="#fff" opacity="0.9"><circle cx="150" cy="120" r="1.6"/><circle cx="210" cy="150" r="1.6"/><circle cx="120" cy="170" r="1.6"/><circle cx="260" cy="130" r="1.6"/><circle cx="190" cy="190" r="1.6"/></g></svg>`},
+];
+
+/* ===== 불꽃 곤충 모양 & 색 ===== */
+const SHAPES=["🦋","🐞","🐝","🐛","🦗","🐜","🐌","🪲","🦂"];
+const COLORS=["#ff5b5b","#ff9f43","#ffd93d","#4cc46a","#35d0c0","#5ec6ff","#4a8ef0","#a97bf0","#ff8ec9","#ffffff"];
+
+const KEY="fireworks_v1";
+let st={season:"spring",shape:"🦋",color:"#ffd93d",rainbow:false};
+try{const s=localStorage.getItem(KEY); if(s) st=Object.assign(st,JSON.parse(s));}catch(e){}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+
+/* ===== 배경/버튼 렌더 ===== */
+const bg=document.getElementById('bg');
+function setSeason(id){ st.season=id; const s=SEASONS.find(x=>x.id===id)||SEASONS[0]; bg.innerHTML=s.svg;
+  [...document.querySelectorAll('#seasonBar .chip')].forEach(c=>c.classList.toggle('on',c.dataset.id===id)); save(); }
+(function(){ const bar=document.getElementById('seasonBar');
+  SEASONS.forEach(s=>{ const b=document.createElement('button'); b.className='chip'; b.dataset.id=s.id; b.textContent=s.emoji+' '+s.name;
+    b.onclick=()=>{ setSeason(s.id); buzz(6); }; bar.appendChild(b); }); })();
+(function(){ const bar=document.getElementById('shapeBar');
+  SHAPES.forEach(ch=>{ const b=document.createElement('button'); b.className='em'; b.dataset.s=ch; b.textContent=ch;
+    b.onclick=()=>{ st.shape=ch; [...bar.querySelectorAll('.em')].forEach(x=>x.classList.toggle('on',x.dataset.s===ch)); save(); buzz(6); }; bar.appendChild(b); }); })();
+(function(){ const bar=document.getElementById('colorBar');
+  COLORS.forEach(c=>{ const b=document.createElement('button'); b.className='sw'; b.dataset.c=c; b.style.background=c;
+    b.onclick=()=>{ st.color=c; st.rainbow=false; markColors(); save(); buzz(6); }; bar.appendChild(b); });
+  const rb=document.createElement('button'); rb.className='sw rb'; rb.dataset.c='rainbow'; rb.title='무지개';
+  rb.onclick=()=>{ st.rainbow=true; markColors(); save(); buzz(6); }; bar.appendChild(rb); })();
+function markColors(){ [...document.querySelectorAll('#colorBar .sw')].forEach(b=>{
+  const on = b.dataset.c==='rainbow' ? st.rainbow : (!st.rainbow && b.dataset.c===st.color); b.classList.toggle('on',on); }); }
+
+/* ===== 캔버스/불꽃 ===== */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const stage=document.getElementById('stage');
+let W=0,H=0,dpr=1;
+function resize(){ dpr=Math.min(2,window.devicePixelRatio||1); W=stage.clientWidth; H=stage.clientHeight;
+  cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+window.addEventListener('resize',resize);
+
+const shapeCache={};
+function shapePoints(ch){
+  if(shapeCache[ch]) return shapeCache[ch];
+  let norm=[];
+  try{
+    const S=72, c=document.createElement('canvas'); c.width=c.height=S; const g=c.getContext('2d');
+    g.clearRect(0,0,S,S); g.textAlign='center'; g.textBaseline='middle'; g.font=(S-16)+'px serif';
+    g.fillText(ch,S/2,S/2+2);
+    const img=g.getImageData(0,0,S,S).data; const pts=[];
+    for(let y=0;y<S;y+=3) for(let x=0;x<S;x+=3){ if(img[(y*S+x)*4+3]>96) pts.push([x,y]); }
+    if(pts.length>10){
+      let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+      pts.forEach(([x,y])=>{mnx=Math.min(mnx,x);mny=Math.min(mny,y);mxx=Math.max(mxx,x);mxy=Math.max(mxy,y);});
+      const cx=(mnx+mxx)/2, cy=(mny+mxy)/2, sc=Math.max(mxx-mnx,mxy-mny)/2||1;
+      const step=Math.max(1,Math.floor(pts.length/56));
+      for(let i=0;i<pts.length;i+=step){ const [x,y]=pts[i]; norm.push([(x-cx)/sc,(y-cy)/sc]); }
+    }
+  }catch(e){}
+  if(norm.length<12){ norm=[]; for(let i=0;i<44;i++){ const a=i/44*Math.PI*2; norm.push([Math.cos(a),Math.sin(a)]); } }
+  shapeCache[ch]=norm; return norm;
+}
+
+let spots=[];          // 놓은 불꽃 {x,y,shape,color,rainbow}
+let shells=[];         // 올라가는 중
+let parts=[];          // 터진 입자
+let running=false, tPulse=0;
+
+stage.addEventListener('pointerdown',function(e){
+  if(e.target.closest('button')) return;
+  const r=cv.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
+  if(y> H*0.9) return;
+  if(spots.length>=18) spots.shift();
+  spots.push({x,y,shape:st.shape,color:st.color,rainbow:st.rainbow});
+  buzz(8);
+});
+
+function burst(sh){
+  boom();
+  const pts=shapePoints(sh.shape);
+  const R=Math.min(W,H)*0.18;
+  const baseHue=Math.random()*360;
+  pts.forEach(([nx,ny])=>{
+    const ox=nx*R, oy=ny*R, k=0.16;
+    parts.push({x:sh.x,y:sh.y,px:sh.x,py:sh.y,vx:ox*k,vy:oy*k,g:0.055,drag:0.9,life:0,max:58+Math.random()*22,
+      col:sh.color, hue: sh.rainbow?((Math.atan2(ny,nx)*180/Math.PI+baseHue+360)%360):null, r:2.4+Math.random()*1.3});
+  });
+  for(let i=0;i<20;i++){ const a=Math.random()*6.283, s=Math.random()*R; 
+    parts.push({x:sh.x,y:sh.y,px:sh.x,py:sh.y,vx:Math.cos(a)*s*0.12,vy:Math.sin(a)*s*0.12,g:0.055,drag:0.9,life:0,max:40+Math.random()*22,
+      col:sh.color, hue: sh.rainbow?((baseHue+i*18)%360):null, r:1.7}); }
+}
+
+function drawMarkers(){
+  ctx.save(); ctx.globalCompositeOperation='source-over';
+  const pulse=0.5+0.5*Math.sin(tPulse*0.12);
+  spots.forEach(sp=>{
+    ctx.globalAlpha=0.35; ctx.strokeStyle='#ffffff'; ctx.lineWidth=1; ctx.setLineDash([4,5]);
+    ctx.beginPath(); ctx.moveTo(sp.x,H); ctx.lineTo(sp.x,sp.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.globalAlpha=0.55+0.35*pulse; ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(sp.shape,sp.x,sp.y);
+    ctx.globalAlpha=0.9; ctx.fillStyle= sp.rainbow?'#ffd93d':sp.color; ctx.beginPath(); ctx.arc(sp.x,H-6,3,0,6.283); ctx.fill();
+  });
+  ctx.restore();
+}
+
+function frame(){
+  tPulse++;
+  ctx.clearRect(0,0,W,H);
+  ctx.globalCompositeOperation='lighter';
+  // 올라가는 불꽃
+  for(const s of shells){ if(s.state!=='rising') continue;
+    s.py=s.y; s.y-=s.vy; s.vy*=0.995;
+    ctx.strokeStyle='rgba(255,235,180,0.9)'; ctx.lineWidth=2.4; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(s.x,s.py); ctx.lineTo(s.x,s.y); ctx.stroke();
+    ctx.globalAlpha=0.9; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(s.x,s.y,2.2,0,6.283); ctx.fill(); ctx.globalAlpha=1;
+    if(s.y<=s.ty){ s.state='done'; burst(s); }
+  }
+  shells=shells.filter(s=>s.state==='rising');
+  // 입자
+  for(const p of parts){ p.px=p.x; p.py=p.y; p.vx*=p.drag; p.vy*=p.drag; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life++;
+    const a=1-p.life/p.max; if(a<=0){ p.dead=1; continue; }
+    ctx.strokeStyle = p.hue!=null ? ('hsl('+p.hue+' 95% '+(56+22*a)+'%)') : p.col;
+    ctx.globalAlpha=Math.max(0,a); ctx.lineWidth=p.r; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(p.px,p.py); ctx.lineTo(p.x,p.y); ctx.stroke();
+  }
+  parts=parts.filter(p=>!p.dead);
+  ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+  if(!running || spots.length) drawMarkers();
+  requestAnimationFrame(frame);
+}
+
+function launch(){
+  if(running) return;
+  if(spots.length===0){ for(let i=0;i<5;i++){ spots.push({x:W*(0.15+Math.random()*0.7),y:H*(0.2+Math.random()*0.35),shape:st.shape,color:st.color,rainbow:st.rainbow}); } }
+  running=true; goBtn.disabled=true; hint.style.display='none';
+  const list=spots.slice();
+  list.forEach((sp,i)=>{ setTimeout(()=>{ whoosh();
+    shells.push({x:sp.x,y:H,py:H,ty:sp.y,vy:Math.max(6,(H-sp.y)/40),state:'rising',shape:sp.shape,color:sp.color,rainbow:sp.rainbow});
+  }, i*300); });
+  setTimeout(()=>{ running=false; goBtn.disabled=false; }, list.length*300+1800);
+}
+
+const goBtn=document.getElementById('goBtn'), hint=document.getElementById('hint');
+goBtn.addEventListener('click',()=>{ ac(); launch(); buzz(12); });
+document.getElementById('clrBtn').addEventListener('click',()=>{ spots=[]; parts=[]; shells=[]; hint.style.display=''; buzz([10,30]); });
+
+const rov=document.getElementById('rov');
+document.getElementById('rulesFab').onclick=()=>rov.classList.add('show');
+document.getElementById('rovClose').onclick=()=>rov.classList.remove('show');
+rov.onclick=e=>{ if(e.target===rov) rov.classList.remove('show'); };
+
+/* 시작 */
+function boot(){ resize(); setSeason(st.season);
+  [...document.querySelectorAll('#shapeBar .em')].forEach(x=>x.classList.toggle('on',x.dataset.s===st.shape));
+  markColors(); requestAnimationFrame(frame); }
+if(document.readyState!=='loading') boot(); else window.addEventListener('DOMContentLoaded',boot);
+setTimeout(resize,200); setTimeout(resize,600);
+</script>
+
+<script id="framelink">
+(function(){
+  function caps(){ try{ parent.postMessage({type:'game-caps', tutorial:false, rules:!!document.getElementById('rulesFab')}, '*'); }catch(e){} }
+  window.addEventListener('message',function(e){ var d=e.data||{};
+    if(d.type==='ui-rules'){ var r=document.getElementById('rulesFab'); if(r) r.click(); } });
+  if(document.readyState!=='loading') caps(); else window.addEventListener('DOMContentLoaded',caps);
+  setTimeout(caps,150);
+})();
+</script>
+</body></html>
+</template>
+</template>
+
   <script>
   (function(){
     "use strict";
@@ -13484,8 +13808,8 @@ renderPick(); renderPal(); loadArt(cur);
     function sendHap(){ try{ frame.contentWindow.postMessage({type:"haptics",on:hapOn},"*"); }catch(e){} }
     function wbuzz(ms){ if(!hapOn) return; try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
     renderHap();
-    const tplId={treasure:"tpl-treasure",skippity:"tpl-skippity",anthome:"tpl-anthome",qwirkle:"tpl-qwirkle",quoridor:"tpl-quoridor",hive:"tpl-hive",zertz:"tpl-zertz",quarto:"tpl-quarto",onitama:"tpl-onitama",kahuna:"tpl-kahuna",story:"tpl-story",pentago:"tpl-pentago",setg:"tpl-setg",dobble:"tpl-dobble",ricochet:"tpl-ricochet",rushhour:"tpl-rushhour",tantrix:"tpl-tantrix",ingenious:"tpl-ingenious",othello:"tpl-othello",pushpush:"tpl-pushpush",memory:"tpl-memory",maze:"tpl-maze",sticker:"tpl-sticker",coloring:"tpl-coloring"};
-    const titles={treasure:"🐝 곤충 정원 보물찾기",skippity:"🦗 메뚜기 폴짝!",anthome:"🐜 개미집 가는 길",qwirkle:"🧩 곤충 쿼클",quoridor:"🪵 곤충 울타리 대결",hive:"🐝 곤충 하이브",zertz:"🦋 곤충 저르츠",quarto:"🐞 곤충 콰르토",onitama:"🐯 오니타마",kahuna:"🐝 곤충 카후나",story:"📖 곤충 이야기꾼",pentago:"🦋 곤충 펜타고",setg:"🔺 세트 · SET",dobble:"🔍 곤충 도블",ricochet:"🐛 애벌레 미끄럼",rushhour:"🐛 애벌레 러시아워",tantrix:"🔷 탄트릭스",ingenious:"🎯 인지니어스",othello:"⚫ 곤충 오델로",pushpush:"📦 원작 소코반",memory:"🧠 곤충 메모리",maze:"🌀 곤충 미로찾기",sticker:"🎨 스티커 놀이판",coloring:"🖍️ 곤충 색칠놀이"};
+    const tplId={treasure:"tpl-treasure",skippity:"tpl-skippity",anthome:"tpl-anthome",qwirkle:"tpl-qwirkle",quoridor:"tpl-quoridor",hive:"tpl-hive",zertz:"tpl-zertz",quarto:"tpl-quarto",onitama:"tpl-onitama",kahuna:"tpl-kahuna",story:"tpl-story",pentago:"tpl-pentago",setg:"tpl-setg",dobble:"tpl-dobble",ricochet:"tpl-ricochet",rushhour:"tpl-rushhour",tantrix:"tpl-tantrix",ingenious:"tpl-ingenious",othello:"tpl-othello",pushpush:"tpl-pushpush",memory:"tpl-memory",maze:"tpl-maze",sticker:"tpl-sticker",coloring:"tpl-coloring",fireworks:"tpl-fireworks"};
+    const titles={treasure:"🐝 곤충 정원 보물찾기",skippity:"🦗 메뚜기 폴짝!",anthome:"🐜 개미집 가는 길",qwirkle:"🧩 곤충 쿼클",quoridor:"🪵 곤충 울타리 대결",hive:"🐝 곤충 하이브",zertz:"🦋 곤충 저르츠",quarto:"🐞 곤충 콰르토",onitama:"🐯 오니타마",kahuna:"🐝 곤충 카후나",story:"📖 곤충 이야기꾼",pentago:"🦋 곤충 펜타고",setg:"🔺 세트 · SET",dobble:"🔍 곤충 도블",ricochet:"🐛 애벌레 미끄럼",rushhour:"🐛 애벌레 러시아워",tantrix:"🔷 탄트릭스",ingenious:"🎯 인지니어스",othello:"⚫ 곤충 오델로",pushpush:"📦 원작 소코반",memory:"🧠 곤충 메모리",maze:"🌀 곤충 미로찾기",sticker:"🎨 스티커 놀이판",coloring:"🖍️ 곤충 색칠놀이",fireworks:"🎆 곤충 불꽃놀이"};
 
     function openGame(id){
       const tpl=document.getElementById(tplId[id]);
