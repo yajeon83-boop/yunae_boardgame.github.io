@@ -342,7 +342,7 @@
           <div class="ic">🖍️</div>
           <div class="ct">
             <div class="cname">곤충 색칠놀이</div>
-            <div class="cdesc">왼쪽 <b>예시</b>를 보고 오른쪽 그림을 색칠해요! 나비·무당벌레·꿀벌·애벌레 등 <b>9가지 곤충</b>, <b>🌈무지개·🪣다 칠하기</b>까지. 그림마다 저장돼요. <span class="orig">오리지널 창작</span></div>
+            <div class="cdesc">왼쪽 <b>예시</b>를 보고 오른쪽 그림을 색칠해요! 나비·무당벌레·꿀벌·애벌레 등 <b>9가지 곤충</b>, <b>🌈무지개·🪣다 칠하기·레인보우 물감</b>까지. 그림마다 저장돼요. <span class="orig">오리지널 창작</span></div>
           </div>
           <div class="cgo">놀러가기 →</div>
         </button>
@@ -12875,7 +12875,7 @@
   .pane.sample .ptag{color:#8a5aa8;border:2px solid #e2d2f2;}
   .pane.work .ptag{color:#c0742a;border:2px solid #f2d0ac;}
   .paper{background:#fff;border-radius:20px;box-shadow:0 8px 22px rgba(120,80,30,.18);padding:6px;
-    width:min(43vw,calc(100dvh - 288px),300px);height:min(43vw,calc(100dvh - 288px),300px);}
+    width:min(44vw,calc(100dvh - 320px),500px);height:min(44vw,calc(100dvh - 320px),500px);}
   .pane.sample .paper{background:#fbf6ff;}
   .paper svg{width:100%;height:100%;display:block;}
   .rg{stroke:#4a4a4a;stroke-width:3;stroke-linejoin:round;stroke-linecap:round;cursor:pointer;transition:fill .12s;}
@@ -12886,14 +12886,15 @@
   .dot{fill:#4a4a4a;pointer-events:none;} .sh{fill:#fff;pointer-events:none;} .ck{opacity:.9;}
 
   /* 색 팔레트 */
-  .pal{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:6px 10px 2px;flex:0 0 auto;}
-  .sw{width:31px;height:31px;border-radius:50%;border:3px solid #fff;cursor:pointer;transition:.12s;box-shadow:0 2px 5px rgba(0,0,0,.16);}
+  .pal{display:flex;flex-wrap:wrap;gap:clamp(7px,1.4vw,13px);justify-content:center;padding:6px 12px 2px;flex:0 0 auto;}
+  .sw{width:clamp(34px,6.2vw,52px);height:clamp(34px,6.2vw,52px);border-radius:50%;border:3px solid #fff;cursor:pointer;transition:.12s;box-shadow:0 2px 6px rgba(0,0,0,.18);}
+  .sw.rainbow{background:conic-gradient(from 0deg,#ff5b5b,#ff9f43,#ffd93d,#4cc46a,#35d0c0,#5ec6ff,#4a8ef0,#a97bf0,#ff8ec9,#ff5b5b);}
   .sw.on{transform:scale(1.22);box-shadow:0 0 0 3px #f2903c,0 3px 8px rgba(0,0,0,.25);}
   .sw.era{background:
     linear-gradient(45deg,#e9e9e9 25%,transparent 25%),linear-gradient(-45deg,#e9e9e9 25%,transparent 25%),
     linear-gradient(45deg,transparent 75%,#e9e9e9 75%),linear-gradient(-45deg,transparent 75%,#e9e9e9 75%);
     background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;background-color:#fff;
-    display:flex;align-items:center;justify-content:center;font-size:14px;}
+    display:flex;align-items:center;justify-content:center;font-size:clamp(14px,2.6vw,20px);}
 
   /* 도구 */
   .tools{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;padding:6px 10px 10px;flex:0 0 auto;}
@@ -12940,12 +12941,6 @@
     <button class="tb warn" id="resetBtn">🧽 처음부터</button>
   </div>
 
-  <div class="win" id="win"><div class="wincard">
-    <div class="big">🎉</div><h2>색칠 완성!</h2>
-    <p id="winName">멋진 그림이 되었어요!</p>
-    <button id="winBtn">계속 꾸미기</button>
-  </div></div>
-  <div class="confWrap" id="confWrap"></div>
 
   <button class="rulesFab" id="rulesFab"></button>
   <div class="rov" id="rov"><div class="rcard">
@@ -13116,23 +13111,30 @@ function buzz(p){ if(!hap) return; try{ if(window.parent&&window.parent!==window
 function applySample(svgEl,d){ const rs=svgEl.querySelectorAll('.rg'); const s=d.sample||[];
   rs.forEach((el,i)=>el.setAttribute('fill', s[i]||WHITE)); }
 
+/* ===== 레인보우 물감 ===== */
+const RAINBOW="url(#rbg)";
+const RBGDEFS='<defs><linearGradient id="rbg" x1="0" y1="0" x2="1" y2="1">'
+ +'<stop offset="0" stop-color="#ff5b5b"/><stop offset="0.18" stop-color="#ff9f43"/>'
+ +'<stop offset="0.36" stop-color="#ffd93d"/><stop offset="0.52" stop-color="#4cc46a"/>'
+ +'<stop offset="0.68" stop-color="#35d0c0"/><stop offset="0.84" stop-color="#5ec6ff"/>'
+ +'<stop offset="1" stop-color="#a97bf0"/></linearGradient></defs>';
+
 /* ===== 팔레트 렌더 ===== */
 const palEl=document.getElementById('pal');
+function mkSw(val,cls,label){
+  const b=document.createElement('button'); b.className='sw'+(cls?(' '+cls):''); b.dataset.c=val;
+  if(!cls) b.style.background=val; if(label) b.textContent=label;
+  b.onclick=()=>{ color=val; markPal(); save(); buzz(6); };
+  palEl.appendChild(b);
+}
 function renderPal(){
   palEl.innerHTML='';
-  COLORS.forEach(c=>{
-    const b=document.createElement('button');
-    b.className='sw'+(c===color?' on':''); b.style.background=c;
-    b.onclick=()=>{ color=c; markPal(); save(); buzz(6); };
-    palEl.appendChild(b);
-  });
-  const er=document.createElement('button');
-  er.className='sw era'+(color===WHITE?' on':''); er.textContent='🧼'; er.title='지우개';
-  er.onclick=()=>{ color=WHITE; markPal(); save(); buzz(6); };
-  palEl.appendChild(er);
+  COLORS.forEach(c=>mkSw(c,'',''));
+  mkSw(RAINBOW,'rainbow','');        // 레인보우 물감
+  mkSw(WHITE,'era','🧼');            // 지우개
+  markPal();
 }
-function markPal(){ [...palEl.children].forEach((b,i)=>{
-  const c=(i<COLORS.length)?COLORS[i]:WHITE; b.classList.toggle('on',c===color); }); }
+function markPal(){ [...palEl.children].forEach(b=>b.classList.toggle('on', b.dataset.c===color)); }
 
 /* ===== 그림 렌더 ===== */
 const art=document.getElementById('art');
@@ -13141,7 +13143,7 @@ function loadArt(id){
   cur=id;
   const d=DRAW.find(x=>x.id===id);
   artS.innerHTML=d.svg; applySample(artS,d);
-  art.innerHTML=d.svg;
+  art.innerHTML=RBGDEFS+d.svg;
   regions=[...art.querySelectorAll('.rg')];
   const st=cget(id);
   regions.forEach((el,i)=>{
@@ -13160,20 +13162,20 @@ function paint(el){
   history.push([{el,prev}]); if(history.length>60) history.shift();
   el.setAttribute('fill',color);
   storeColor(el.dataset.r,color);
-  sparkle(el); buzz(7); checkDone();
+  sparkle(el); buzz(7);
 }
 function storeColor(i,c){ const st=cget(cur); if(c===WHITE) delete st.colors[i]; else st.colors[i]=c; save(); }
 
 function fillAll(){
   const batch=[];
   regions.forEach(el=>{ const prev=el.getAttribute('fill'); if(prev!==color){ batch.push({el,prev}); el.setAttribute('fill',color); storeColor(el.dataset.r,color);} });
-  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,12]); checkDone(); }
+  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,12]); }
 }
 function rainbow(){
   const batch=[]; let k=Math.floor(Math.random()*COLORS.length);
   regions.forEach(el=>{ const prev=el.getAttribute('fill'); const c=COLORS[k%COLORS.length]; k+=3+Math.floor(Math.random()*4);
     if(prev!==c){ batch.push({el,prev}); el.setAttribute('fill',c); storeColor(el.dataset.r,c);} });
-  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,10,30,14]); checkDone(); }
+  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,10,30,14]); }
 }
 function undo(){ if(!history.length){ buzz(20); return; } const batch=history.pop();
   batch.forEach(({el,prev})=>{ el.setAttribute('fill',prev); storeColor(el.dataset.r,prev); }); buzz(9); }
@@ -13187,26 +13189,6 @@ function reset(){
   regions.forEach(el=>el.setAttribute('fill',WHITE));
   const st=cget(cur); st.colors={}; st.done=0; save(); history=[]; buzz([14,40,14]);
 }
-
-/* ===== 완성 축하 ===== */
-function checkDone(){
-  const st=cget(cur);
-  const all=regions.length && regions.every(el=>el.getAttribute('fill')!==WHITE);
-  if(all && !st.done){ st.done=1; save(); celebrate(); }
-}
-function celebrate(){
-  buzz([20,50,20,50,30]);
-  document.getElementById('winName').textContent=(DRAW.find(d=>d.id===cur)||{}).name+' 색칠 완성! 정말 멋져요!';
-  document.getElementById('win').classList.add('show');
-  const w=document.getElementById('confWrap'); w.innerHTML='';
-  const cs=["#ff5b5b","#ffd93d","#4cc46a","#5ec6ff","#a97bf0","#ff8ec9","#ff9f43"];
-  for(let i=0;i<70;i++){ const p=document.createElement('div'); p.className='conf';
-    p.style.left=Math.random()*100+'vw'; p.style.background=cs[i%cs.length];
-    p.style.animationDuration=(1.6+Math.random()*1.4)+'s'; p.style.animationDelay=(Math.random()*.5)+'s';
-    p.style.transform='rotate('+(Math.random()*360)+'deg)'; w.appendChild(p); }
-  setTimeout(()=>{w.innerHTML='';},3600);
-}
-document.getElementById('winBtn').onclick=()=>document.getElementById('win').classList.remove('show');
 
 function sparkle(el){
   try{ const b=el.getBoundingClientRect(); const s=document.createElement('div'); s.className='spark';
