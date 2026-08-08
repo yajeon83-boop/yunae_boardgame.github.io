@@ -13519,9 +13519,6 @@ renderPick(); renderPal(); loadArt(cur);
   .fw svg .dot,.fw svg .sh{fill:var(--st,currentColor);}
   .fw.marker{transform:scale(.92);opacity:.9;pointer-events:auto;cursor:pointer;}
   .fw.marker.sel{opacity:1;transform:scale(1.02);filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffd23d);}
-  .ring{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:3px solid #fff;
-    opacity:.9;transform:scale(.3);animation:ringpop .72s ease-out forwards;pointer-events:none;}
-  @keyframes ringpop{to{transform:scale(10);opacity:0;}}
   .hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:13px;color:#fff;
     text-shadow:0 1px 4px rgba(0,0,0,.6);pointer-events:none;opacity:.92;}
 
@@ -13873,8 +13870,6 @@ function renderMarkers(){
   });
 }
 
-function ring(sp){ const r=document.createElement('div'); r.className='ring'; r.style.left=sp.x+'px'; r.style.top=sp.y+'px'; r.style.borderColor=sp.rainbow?'#ffd93d':sp.color; fx.appendChild(r); setTimeout(()=>r.remove(),720); }
-
 const RISE=1600, BURST=650;   // 상승은 천천히, 터진 뒤엔 바로 서서히 사라짐
 function fire(sp,delay){ setTimeout(()=>{
   whoosh();
@@ -13884,7 +13879,7 @@ function fire(sp,delay){ setTimeout(()=>{
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
     w.style.transition='transform '+RISE+'ms cubic-bezier(.15,.6,.3,1)'; w.style.transform='translateY(0) scale(.85)';
   }); });
-  setTimeout(()=>{ boom(); ring(sp);
+  setTimeout(()=>{ boom();
     w.style.transition='transform '+BURST+'ms cubic-bezier(.12,.6,.3,1), opacity '+BURST+'ms ease-out';
     w.style.transform='translateY(0) scale(2.7)'; w.style.opacity='0';   // 커지며 서서히 사라짐
     setTimeout(()=>w.remove(),BURST+40);
