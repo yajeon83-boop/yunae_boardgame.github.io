@@ -13498,9 +13498,12 @@ renderPick(); renderPal(); loadArt(cur);
   .chip{flex:0 0 auto;border:2px solid #3a3556;background:#26233c;color:#eee;border-radius:12px;
     padding:6px 11px;font-size:14px;font-weight:800;cursor:pointer;transition:.12s;display:inline-flex;align-items:center;gap:4px;}
   .chip.on{border-color:#ffd23d;background:#3a3320;color:#ffe38a;box-shadow:0 0 0 2px rgba(255,210,61,.25);}
-  .em{flex:0 0 auto;width:44px;height:44px;border-radius:12px;border:2px solid #3a3556;background:#26233c;
-    font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;}
-  .em.on{border-color:#ffd23d;box-shadow:0 0 0 2px rgba(255,210,61,.3);transform:translateY(-2px);}
+  .em{flex:0 0 auto;width:46px;height:46px;border-radius:12px;border:2px solid #3a3556;background:#26233c;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;color:#cdb8ff;}
+  .em svg{width:36px;height:36px;overflow:visible;}
+  .em svg .rg,.em svg .ln{fill:none;stroke:currentColor;stroke-width:8;stroke-dasharray:3 6;stroke-linecap:round;stroke-linejoin:round;}
+  .em svg .dot,.em svg .sh{fill:currentColor;}
+  .em.on{color:#ffe38a;border-color:#ffd23d;box-shadow:0 0 0 2px rgba(255,210,61,.3);transform:translateY(-2px);}
   .sw{flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:3px solid #2a2740;cursor:pointer;transition:.12s;}
   .sw.on{transform:scale(1.2);border-color:#fff;box-shadow:0 0 0 2px #ffd23d;}
   .sw.rb{background:conic-gradient(from 0deg,#ff5b5b,#ff9f43,#ffd93d,#4cc46a,#35d0c0,#5ec6ff,#4a8ef0,#a97bf0,#ff8ec9,#ff5b5b);}
@@ -13508,7 +13511,23 @@ renderPick(); renderPal(); loadArt(cur);
   .stage{flex:1;position:relative;min-height:0;overflow:hidden;}
   .bg{position:absolute;inset:0;}
   .bg svg{width:100%;height:100%;display:block;}
-  canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;}
+  .fxlayer{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .fw{position:absolute;width:150px;height:150px;pointer-events:none;will-change:transform,opacity;
+    filter:drop-shadow(0 0 6px rgba(255,255,255,.28));}
+  .fw svg{width:100%;height:100%;overflow:visible;display:block;}
+  .fw svg .rg,.fw svg .ln{fill:none;stroke:currentColor;stroke-width:6;stroke-dasharray:3 9;stroke-linecap:round;stroke-linejoin:round;}
+  .fw svg .dot,.fw svg .sh{fill:currentColor;}
+  .fw.marker{transform:scale(.92);opacity:.9;pointer-events:auto;cursor:pointer;}
+  .fw.marker.sel{opacity:1;transform:scale(1.02);filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffd23d);}
+  .fw.rainbow{animation:rbcolor 1.1s linear infinite;}
+  @keyframes rbcolor{0%{color:#ff5b5b}16%{color:#ff9f43}33%{color:#ffd93d}50%{color:#4cc46a}66%{color:#35d0c0}83%{color:#5ec6ff}100%{color:#a97bf0}}
+  .trail{position:absolute;width:3px;margin-left:-1.5px;background:linear-gradient(to top,transparent,#fff);
+    opacity:.8;border-radius:2px;pointer-events:none;}
+  .ring{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:3px solid #fff;
+    opacity:.9;transform:scale(.3);animation:ringpop .62s ease-out forwards;pointer-events:none;}
+  @keyframes ringpop{to{transform:scale(9);opacity:0;}}
+  .mline{position:absolute;width:0;border-left:2px dashed rgba(255,255,255,.38);pointer-events:none;}
+  .mdot{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,.5);}
   .hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:13px;color:#fff;
     text-shadow:0 1px 4px rgba(0,0,0,.6);pointer-events:none;opacity:.92;}
 
@@ -13530,12 +13549,12 @@ renderPick(); renderPal(); loadArt(cur);
 <body>
   <div class="bar" id="seasonBar"><span class="lb">배경</span></div>
   <div class="bar" id="shapeBar"><span class="lb">불꽃 곤충</span></div>
-  <div class="bar" id="colorBar"><span class="lb">불꽃 색</span></div>
+  <div class="bar" id="colorBar"><span class="lb">라인 색</span></div>
 
   <div class="stage" id="stage">
     <div class="bg" id="bg"></div>
-    <canvas id="cv"></canvas>
-    <div class="hint" id="hint">하늘을 톡 눌러 불꽃을 놓고 🎆실행!</div>
+    <div class="fxlayer" id="fx"></div>
+    <div class="hint" id="hint">하늘을 톡 눌러 곤충을 놓아요 · 곤충을 톡 하면 색을 바꿔요 · 🎆실행!</div>
   </div>
 
   <div class="tools">
@@ -13546,10 +13565,10 @@ renderPick(); renderPal(); loadArt(cur);
   <button class="rulesFab" id="rulesFab"></button>
   <div class="rov" id="rov"><div class="rcard">
     <h2>🎆 곤충 불꽃놀이</h2>
-    <p>1) <b>배경</b>에서 봄·여름·가을·겨울을 골라요.</p>
-    <p>2) <b>불꽃 곤충</b> 모양과 <b>불꽃 색</b>을 골라요.</p>
-    <p>3) 하늘을 <b>톡톡</b> 눌러 불꽃을 여러 개 놓아요(모양·색 바꿔가며).</p>
-    <p>4) <b>🎆실행</b>을 누르면 불꽃이 <b>팡팡!</b> 터져요. <b>🧹지우기</b>로 다시 꾸며요.</p>
+    <p>1) <b>배경</b>(봄·여름·가을·겨울)을 골라요.</p>
+    <p>2) <b>불꽃 곤충</b> 모양과 <b>라인 색</b>을 골라요(점선 곤충이에요!).</p>
+    <p>3) 하늘을 <b>톡톡</b> 눌러 곤충을 여러 개 놓아요. <b>놓은 곤충을 톡</b> 하면 색을 바꿀 수 있어요.</p>
+    <p>4) <b>🎆실행</b>을 누르면 곤충이 올라가 <b>팡!</b> 커지며 터져 사라져요.</p>
     <button id="rovClose">알았어요!</button>
   </div></div>
 
@@ -13558,32 +13577,44 @@ renderPick(); renderPal(); loadArt(cur);
 let hap=true;
 window.addEventListener('message',e=>{const d=e.data; if(d&&d.type==='haptics') hap=!!d.on;});
 function buzz(p){ if(!hap) return; try{ if(window.parent&&window.parent!==window){ parent.postMessage({type:'buzz',p:p},'*'); return; } }catch(e){} try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
-
 let _ac=null,_noise=null;
 function ac(){ if(!_ac){ try{ _ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(_ac&&_ac.state==='suspended') _ac.resume(); return _ac; }
 function noiseBuf(a){ if(_noise) return _noise; const n=Math.floor(a.sampleRate*0.5); const b=a.createBuffer(1,n,a.sampleRate); const d=b.getChannelData(0); for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n); _noise=b; return b; }
-function boom(){ /* 팡! 터지는 소리 */
-  if(!hap) return; const a=ac(); if(!a) return;
-  try{
-    const t=a.currentTime;
-    const src=a.createBufferSource(); src.buffer=noiseBuf(a);
-    const bp=a.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1100; bp.Q.value=0.6;
-    const g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
-    src.connect(bp); bp.connect(g); g.connect(a.destination); src.start(t); src.stop(t+0.5);
-    const o=a.createOscillator(),og=a.createGain(); o.type='sine';
-    o.frequency.setValueAtTime(170,t); o.frequency.exponentialRampToValueAtTime(55,t+0.2);
-    og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.5,t+0.01); og.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
-    o.connect(og); og.connect(a.destination); o.start(t); o.stop(t+0.32);
-    for(let i=0;i<6;i++){ const tt=t+0.05+Math.random()*0.32; const c=a.createOscillator(),cg=a.createGain();
-      c.type='square'; c.frequency.value=700+Math.random()*1700;
-      cg.gain.setValueAtTime(0.0001,tt); cg.gain.exponentialRampToValueAtTime(0.1,tt+0.004); cg.gain.exponentialRampToValueAtTime(0.0001,tt+0.05);
-      c.connect(cg); cg.connect(a.destination); c.start(tt); c.stop(tt+0.06); }
+let _wn=null;
+function wnoise(a){ if(_wn) return _wn; const n=Math.floor(a.sampleRate*0.75); const b=a.createBuffer(1,n,a.sampleRate); const d=b.getChannelData(0); for(let i=0;i<n;i++) d[i]=Math.random()*2-1; _wn=b; return b; }
+
+/* 한 번의 '팡' */
+function pop1(a,t,f){
+  const src=a.createBufferSource(); src.buffer=noiseBuf(a);
+  const bp=a.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=f; bp.Q.value=0.7;
+  const g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+  src.connect(bp); bp.connect(g); g.connect(a.destination); src.start(t); src.stop(t+0.24);
+  const o=a.createOscillator(),og=a.createGain(); o.type='sine';
+  o.frequency.setValueAtTime(f*0.14+120,t); o.frequency.exponentialRampToValueAtTime(48,t+0.15);
+  og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.45,t+0.008); og.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
+  o.connect(og); og.connect(a.destination); o.start(t); o.stop(t+0.22);
+  for(let i=0;i<3;i++){ const tt=t+0.03+Math.random()*0.16; const c=a.createOscillator(),cg=a.createGain();
+    c.type='square'; c.frequency.value=800+Math.random()*1500;
+    cg.gain.setValueAtTime(0.0001,tt); cg.gain.exponentialRampToValueAtTime(0.08,tt+0.004); cg.gain.exponentialRampToValueAtTime(0.0001,tt+0.045);
+    c.connect(cg); cg.connect(a.destination); c.start(tt); c.stop(tt+0.05); }
+}
+/* 팡팡팡 (3연발) */
+function boom(){ if(!hap) return; const a=ac(); if(!a) return;
+  try{ const t=a.currentTime;
+    for(let i=0;i<3;i++){ pop1(a, t+i*0.11, 950+Math.random()*450 - i*120); }
   }catch(e){}
 }
+/* 슈~~웅 (상승) */
 function whoosh(){ if(!hap) return; const a=ac(); if(!a) return; try{ const t=a.currentTime;
-  const o=a.createOscillator(),g=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(760,t+0.45);
-  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.08,t+0.05); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
-  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+0.5);}catch(e){} }
+  const src=a.createBufferSource(); src.buffer=wnoise(a);
+  const bp=a.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=7;
+  bp.frequency.setValueAtTime(480,t); bp.frequency.exponentialRampToValueAtTime(2700,t+0.55);
+  const g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.13,t+0.09); g.gain.exponentialRampToValueAtTime(0.0001,t+0.62);
+  src.connect(bp); bp.connect(g); g.connect(a.destination); src.start(t); src.stop(t+0.64);
+  const o=a.createOscillator(),og=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(320,t); o.frequency.exponentialRampToValueAtTime(1050,t+0.5);
+  og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.04,t+0.1); og.gain.exponentialRampToValueAtTime(0.0001,t+0.55);
+  o.connect(og); og.connect(a.destination); o.start(t); o.stop(t+0.56);
+}catch(e){} }
 
 /* ===== 계절 배경 ===== */
 const SEASONS=[
@@ -13626,16 +13657,174 @@ const SEASONS=[
   <g fill="#fff" opacity="0.9"><circle cx="150" cy="120" r="1.6"/><circle cx="210" cy="150" r="1.6"/><circle cx="120" cy="170" r="1.6"/><circle cx="260" cy="130" r="1.6"/><circle cx="190" cy="190" r="1.6"/></g></svg>`},
 ];
 
-/* ===== 불꽃 곤충 모양 & 색 ===== */
-const SHAPES=["🦋","🐞","🐝","🐛","🦗","🐜","🐌","🪲","🦂"];
+/* ===== 곤충 (색칠놀이 SVG) ===== */
+const INSECTS=[
+{id:"butterfly",name:"나비",svg:`
+  <path class="rg" d="M104 92 C 64 52 24 66 26 104 C 28 132 72 130 104 110 Z"/>
+  <path class="rg" d="M116 92 C 156 52 196 66 194 104 C 192 132 148 130 116 110 Z"/>
+  <path class="rg" d="M104 116 C 74 126 46 156 62 184 C 80 210 108 176 108 144 Z"/>
+  <path class="rg" d="M116 116 C 146 126 174 156 158 184 C 140 210 112 176 112 144 Z"/>
+  <circle class="rg" cx="58" cy="88" r="11"/><circle class="rg" cx="48" cy="108" r="7"/>
+  <circle class="rg" cx="162" cy="88" r="11"/><circle class="rg" cx="172" cy="108" r="7"/>
+  <circle class="rg" cx="70" cy="156" r="9"/><circle class="rg" cx="150" cy="156" r="9"/>
+  <ellipse class="rg" cx="110" cy="112" rx="9" ry="46"/><circle class="rg" cx="110" cy="60" r="12"/>
+  <path class="ln" d="M104 52 C 96 36 90 30 82 26"/><path class="ln" d="M116 52 C 124 36 130 30 138 26"/>
+  <circle class="dot" cx="81" cy="25" r="3.4"/><circle class="dot" cx="139" cy="25" r="3.4"/>
+  <circle class="dot" cx="105" cy="60" r="2.6"/><circle class="dot" cx="115" cy="60" r="2.6"/>
+  <path class="ln sm" d="M104 66 Q110 71 116 66"/>`},
+{id:"ladybug",name:"무당벌레",svg:`
+  <path class="ln" d="M64 96 L44 84 M60 128 L38 128 M66 158 L46 172"/>
+  <path class="ln" d="M156 96 L176 84 M160 128 L182 128 M154 158 L174 172"/>
+  <ellipse class="rg" cx="110" cy="54" rx="26" ry="19"/>
+  <path class="rg" d="M110 64 C 66 64 50 100 56 138 C 61 170 86 188 110 188 Z"/>
+  <path class="rg" d="M110 64 C 154 64 170 100 164 138 C 159 170 134 188 110 188 Z"/>
+  <circle class="rg" cx="84" cy="102" r="12"/><circle class="rg" cx="80" cy="140" r="11"/><circle class="rg" cx="98" cy="168" r="9"/>
+  <circle class="rg" cx="136" cy="102" r="12"/><circle class="rg" cx="140" cy="140" r="11"/><circle class="rg" cx="122" cy="168" r="9"/>
+  <path class="ln" d="M110 66 L110 186"/>
+  <path class="ln" d="M98 40 C 92 30 90 26 86 22 M122 40 C 128 30 130 26 134 22"/>
+  <circle class="dot" cx="86" cy="21" r="3.4"/><circle class="dot" cx="134" cy="21" r="3.4"/>
+  <circle class="dot" cx="101" cy="56" r="2.8"/><circle class="dot" cx="119" cy="56" r="2.8"/>
+  <path class="ln sm" d="M102 63 Q110 68 118 63"/>`},
+{id:"bee",name:"꿀벌",svg:`
+  <defs><clipPath id="beeBody"><ellipse cx="110" cy="128" rx="42" ry="52"/></clipPath></defs>
+  <ellipse class="rg" cx="72" cy="84" rx="24" ry="15" transform="rotate(-26 72 84)"/>
+  <ellipse class="rg" cx="148" cy="84" rx="24" ry="15" transform="rotate(26 148 84)"/>
+  <g clip-path="url(#beeBody)">
+    <rect class="rg" x="64" y="74" width="92" height="29"/><rect class="rg" x="64" y="103" width="92" height="26"/>
+    <rect class="rg" x="64" y="129" width="92" height="26"/><rect class="rg" x="64" y="155" width="92" height="34"/>
+  </g>
+  <ellipse class="ln" cx="110" cy="128" rx="42" ry="52"/>
+  <ellipse class="rg" cx="110" cy="58" rx="28" ry="23"/>
+  <path class="ln" d="M100 42 C 94 30 92 26 88 22 M120 42 C 126 30 128 26 132 22"/>
+  <circle class="dot" cx="88" cy="21" r="3.4"/><circle class="dot" cx="132" cy="21" r="3.4"/>
+  <circle class="dot" cx="102" cy="58" r="3"/><circle class="dot" cx="118" cy="58" r="3"/>
+  <path class="ln sm" d="M101 66 Q110 72 119 66"/>
+  <path class="rg" d="M100 178 L120 178 L110 206 Z"/>`},
+{id:"dragonfly",name:"잠자리",svg:`
+  <ellipse class="rg" cx="72" cy="86" rx="40" ry="15" transform="rotate(-18 72 86)"/>
+  <ellipse class="rg" cx="148" cy="86" rx="40" ry="15" transform="rotate(18 148 86)"/>
+  <ellipse class="rg" cx="76" cy="116" rx="34" ry="13" transform="rotate(16 76 116)"/>
+  <ellipse class="rg" cx="144" cy="116" rx="34" ry="13" transform="rotate(-16 144 116)"/>
+  <ellipse class="rg" cx="110" cy="70" rx="12" ry="16"/>
+  <rect class="rg" x="101" y="84" width="18" height="24" rx="8"/><rect class="rg" x="102" y="106" width="16" height="24" rx="7"/>
+  <rect class="rg" x="103" y="128" width="14" height="24" rx="6"/><rect class="rg" x="104" y="150" width="12" height="28" rx="5"/>
+  <circle class="rg" cx="110" cy="52" r="16"/>
+  <circle class="rg" cx="100" cy="48" r="8"/><circle class="rg" cx="120" cy="48" r="8"/>
+  <circle class="dot" cx="100" cy="48" r="3"/><circle class="dot" cx="120" cy="48" r="3"/>
+  <path class="ln sm" d="M103 60 Q110 64 117 60"/>`},
+{id:"caterpillar",name:"애벌레",svg:`
+  <path class="ln lg" d="M64 150 L58 168 M92 154 L88 172 M120 154 L118 172 M148 150 L152 168"/>
+  <circle class="rg" cx="168" cy="120" r="24"/><circle class="rg" cx="140" cy="126" r="22"/>
+  <circle class="rg" cx="114" cy="128" r="22"/><circle class="rg" cx="88" cy="128" r="22"/><circle class="rg" cx="64" cy="126" r="22"/>
+  <circle class="rg" cx="42" cy="118" r="26"/>
+  <path class="ln" d="M34 96 C 28 82 26 74 22 66 M46 94 C 44 78 46 70 44 62"/>
+  <circle class="dot" cx="22" cy="65" r="3.4"/><circle class="dot" cx="44" cy="61" r="3.4"/>
+  <circle class="dot" cx="34" cy="114" r="3.2"/><circle class="dot" cx="50" cy="114" r="3.2"/>
+  <path class="ln sm" d="M34 128 Q44 136 54 128"/>
+  <circle class="rg ck" cx="30" cy="128" r="5"/><circle class="rg ck" cx="56" cy="128" r="5"/>`},
+{id:"snail",name:"달팽이",svg:`
+  <path class="rg" d="M40 168 C 36 150 44 140 66 138 L150 138 C 176 138 184 152 176 168 C 172 176 150 178 110 178 L60 178 C 48 178 42 174 40 168 Z"/>
+  <path class="rg" d="M150 138 C 154 116 168 108 182 110 C 196 112 198 128 190 140 C 184 150 168 150 150 146 Z"/>
+  <circle class="rg" cx="96" cy="110" r="46"/><circle class="rg" cx="102" cy="112" r="30"/><circle class="rg" cx="107" cy="114" r="15"/>
+  <path class="ln" d="M184 112 C 186 96 188 88 190 78 M176 116 C 174 100 172 92 168 82"/>
+  <circle class="dot" cx="190" cy="76" r="3.6"/><circle class="dot" cx="168" cy="81" r="3.6"/>
+  <circle class="dot" cx="184" cy="126" r="3"/><path class="ln sm" d="M176 134 Q184 138 190 133"/>`},
+{id:"beetle",name:"사슴벌레",svg:`
+  <path class="ln lg" d="M78 118 L52 108 M76 140 L50 140 M80 162 L56 176 M142 118 L168 108 M144 140 L170 140 M140 162 L164 176"/>
+  <path class="rg" d="M92 44 C 78 30 70 20 72 40 C 74 54 84 58 96 58 Z"/>
+  <path class="rg" d="M128 44 C 142 30 150 20 148 40 C 146 54 136 58 124 58 Z"/>
+  <ellipse class="rg" cx="110" cy="60" rx="24" ry="18"/>
+  <ellipse class="rg" cx="110" cy="90" rx="30" ry="20"/>
+  <path class="rg" d="M110 104 C 78 104 66 130 70 156 C 74 178 92 190 110 190 Z"/>
+  <path class="rg" d="M110 104 C 142 104 154 130 150 156 C 146 178 128 190 110 190 Z"/>
+  <path class="ln" d="M110 106 L110 188"/>
+  <circle class="dot" cx="101" cy="60" r="3"/><circle class="dot" cx="119" cy="60" r="3"/>`},
+{id:"grasshopper",name:"메뚜기",svg:`
+  <path class="ln lg" d="M120 118 C 150 120 168 150 172 182 M118 120 C 96 132 84 150 78 172"/>
+  <path class="rg" d="M96 108 C 120 90 168 96 180 128 C 168 150 128 150 104 132 Z"/>
+  <ellipse class="rg" cx="120" cy="120" rx="40" ry="24"/>
+  <ellipse class="rg" cx="72" cy="112" rx="22" ry="20"/>
+  <path class="ln" d="M60 100 C 48 84 40 74 30 64 M66 96 C 60 80 58 70 54 58"/>
+  <circle class="dot" cx="30" cy="63" r="3.4"/><circle class="dot" cx="54" cy="57" r="3.4"/>
+  <circle class="rg" cx="66" cy="106" r="7"/><circle class="dot" cx="66" cy="106" r="3"/>
+  <path class="ln sm" d="M56 118 Q64 123 74 119"/>
+  <path class="ln lg" d="M132 138 C 128 160 132 176 140 190"/>`},
+{id:"mantis",name:"사마귀",svg:`
+  <path class="ln lg" d="M118 150 C 140 156 156 172 160 190 M116 168 C 132 176 144 186 150 196"/>
+  <ellipse class="rg" cx="94" cy="150" rx="16" ry="46" transform="rotate(-8 94 150)"/>
+  <ellipse class="rg" cx="126" cy="150" rx="16" ry="46" transform="rotate(8 126 150)"/>
+  <ellipse class="rg" cx="110" cy="158" rx="20" ry="44"/>
+  <rect class="rg" x="103" y="60" width="14" height="66" rx="7"/>
+  <path class="rg" d="M104 76 C 86 72 74 58 78 42 C 80 34 88 38 88 48 C 88 60 96 70 106 74 Z"/>
+  <path class="rg" d="M116 76 C 134 72 146 58 142 42 C 140 34 132 38 132 48 C 132 60 124 70 114 74 Z"/>
+  <path class="rg" d="M110 34 L130 60 Q110 68 90 60 Z"/>
+  <circle class="rg" cx="97" cy="52" r="7"/><circle class="rg" cx="123" cy="52" r="7"/>
+  <circle class="dot" cx="97" cy="52" r="2.6"/><circle class="dot" cx="123" cy="52" r="2.6"/>
+  <path class="ln" d="M104 36 C 100 26 98 22 96 16 M116 36 C 120 26 122 22 124 16"/>
+  <path class="ln sm" d="M102 62 Q110 66 118 62"/>`},
+{id:"rhinobeetle",name:"장수풍뎅이",svg:`
+  <path class="ln lg" d="M80 96 L52 86 M78 120 L48 120 M82 150 L56 166 M140 96 L168 86 M142 120 L172 120 M138 150 L164 166"/>
+  <path class="rg" d="M104 50 C 100 30 96 16 92 8 C 90 3 97 2 100 11 C 103 20 106 30 110 36 C 114 30 117 20 120 11 C 123 2 130 3 128 8 C 124 16 120 30 116 50 Z"/>
+  <ellipse class="rg" cx="110" cy="58" rx="17" ry="13"/>
+  <ellipse class="rg" cx="110" cy="86" rx="32" ry="24"/>
+  <path class="rg" d="M110 104 C 78 104 66 132 70 160 C 74 184 92 196 110 196 Z"/>
+  <path class="rg" d="M110 104 C 142 104 154 132 150 160 C 146 184 128 196 110 196 Z"/>
+  <path class="ln" d="M110 106 L110 194"/>
+  <circle class="dot" cx="102" cy="58" r="2.6"/><circle class="dot" cx="118" cy="58" r="2.6"/>`},
+{id:"cicada",name:"매미",svg:`
+  <ellipse class="rg" cx="78" cy="132" rx="20" ry="64" transform="rotate(-12 78 132)"/>
+  <ellipse class="rg" cx="142" cy="132" rx="20" ry="64" transform="rotate(12 142 132)"/>
+  <path class="rg" d="M92 96 L128 96 L118 176 Q110 187 102 176 Z"/>
+  <ellipse class="rg" cx="110" cy="86" rx="24" ry="22"/>
+  <ellipse class="rg" cx="110" cy="54" rx="24" ry="17"/>
+  <circle class="rg" cx="90" cy="52" r="8"/><circle class="rg" cx="130" cy="52" r="8"/>
+  <circle class="dot" cx="90" cy="52" r="3"/><circle class="dot" cx="130" cy="52" r="3"/>
+  <path class="ln sm" d="M101 60 Q110 65 119 60"/>
+  <path class="ln" d="M104 40 C 100 32 98 28 96 22 M116 40 C 120 32 122 28 124 22"/>`},
+{id:"scorpion",name:"전갈",svg:`
+  <path class="ln lg" d="M92 84 L64 78 M94 98 L66 100 M96 112 L70 122 M100 126 L78 140 M128 84 L156 78 M126 98 L154 100 M124 112 L150 122 M120 126 L142 140"/>
+  <ellipse class="rg" cx="110" cy="104" rx="20" ry="16"/>
+  <ellipse class="rg" cx="110" cy="126" rx="17" ry="15"/>
+  <ellipse class="rg" cx="110" cy="146" rx="14" ry="13"/>
+  <circle class="rg" cx="116" cy="166" r="12"/>
+  <circle class="rg" cx="134" cy="178" r="11"/>
+  <circle class="rg" cx="154" cy="176" r="10"/>
+  <circle class="rg" cx="168" cy="162" r="9"/>
+  <path class="rg" d="M176 158 C 188 152 194 140 186 130 C 182 126 178 132 179 138 C 180 146 174 154 168 158 Z"/>
+  <ellipse class="rg" cx="110" cy="74" rx="26" ry="22"/>
+  <path class="rg" d="M92 62 C 80 54 70 50 62 46 C 56 43 58 52 64 56 C 72 61 84 66 92 70 Z"/>
+  <path class="rg" d="M128 62 C 140 54 150 50 158 46 C 164 43 162 52 156 56 C 148 61 136 66 128 70 Z"/>
+  <path class="rg" d="M62 48 C 48 40 36 44 38 58 C 40 70 54 72 60 64 C 55 62 50 56 53 50 C 56 46 60 48 60 53 Z"/>
+  <path class="rg" d="M158 48 C 172 40 184 44 182 58 C 180 70 166 72 160 64 C 165 62 170 56 167 50 C 164 46 160 48 160 53 Z"/>
+  <circle class="dot" cx="104" cy="70" r="2.6"/><circle class="dot" cx="116" cy="70" r="2.6"/>`},
+{id:"snake",name:"뱀",svg:`
+  <circle class="rg" cx="62" cy="198" r="15"/>
+  <circle class="rg" cx="84" cy="190" r="16"/>
+  <circle class="rg" cx="104" cy="180" r="16"/>
+  <circle class="rg" cx="120" cy="166" r="16"/>
+  <circle class="rg" cx="126" cy="148" r="16"/>
+  <circle class="rg" cx="118" cy="130" r="16"/>
+  <circle class="rg" cx="102" cy="118" r="16"/>
+  <circle class="rg" cx="90" cy="102" r="16"/>
+  <circle class="rg" cx="98" cy="84" r="16"/>
+  <circle class="rg" cx="116" cy="72" r="16"/>
+  <ellipse class="rg" cx="134" cy="58" rx="22" ry="16" transform="rotate(18 134 58)"/>
+  <path class="ln sm" style="stroke:#e0574d" d="M152 50 L170 42 M152 50 L167 55"/>
+  <circle class="dot" cx="132" cy="52" r="2.8"/>
+  <path class="ln sm" d="M124 62 Q132 66 140 60"/>`}
+];
+
+/* ===== 색 ===== */
 const COLORS=["#ff5b5b","#ff9f43","#ffd93d","#4cc46a","#35d0c0","#5ec6ff","#4a8ef0","#a97bf0","#ff8ec9","#ffffff"];
 
-const KEY="fireworks_v1";
-let st={season:"spring",shape:"🦋",color:"#ffd93d",rainbow:false};
+const KEY="fireworks_v2";
+let st={season:"spring",shape:INSECTS[0].id,color:"#ffd93d",rainbow:false};
 try{const s=localStorage.getItem(KEY); if(s) st=Object.assign(st,JSON.parse(s));}catch(e){}
+if(!INSECTS.find(x=>x.id===st.shape)) st.shape=INSECTS[0].id;
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+function insectSVG(id){ const d=INSECTS.find(x=>x.id===id)||INSECTS[0]; return '<svg viewBox="0 0 220 220">'+d.svg+'</svg>'; }
 
-/* ===== 배경/버튼 렌더 ===== */
+/* ===== 바 렌더 ===== */
 const bg=document.getElementById('bg');
 function setSeason(id){ st.season=id; const s=SEASONS.find(x=>x.id===id)||SEASONS[0]; bg.innerHTML=s.svg;
   [...document.querySelectorAll('#seasonBar .chip')].forEach(c=>c.classList.toggle('on',c.dataset.id===id)); save(); }
@@ -13643,140 +13832,87 @@ function setSeason(id){ st.season=id; const s=SEASONS.find(x=>x.id===id)||SEASON
   SEASONS.forEach(s=>{ const b=document.createElement('button'); b.className='chip'; b.dataset.id=s.id; b.textContent=s.emoji+' '+s.name;
     b.onclick=()=>{ setSeason(s.id); buzz(6); }; bar.appendChild(b); }); })();
 (function(){ const bar=document.getElementById('shapeBar');
-  SHAPES.forEach(ch=>{ const b=document.createElement('button'); b.className='em'; b.dataset.s=ch; b.textContent=ch;
-    b.onclick=()=>{ st.shape=ch; [...bar.querySelectorAll('.em')].forEach(x=>x.classList.toggle('on',x.dataset.s===ch)); save(); buzz(6); }; bar.appendChild(b); }); })();
+  INSECTS.forEach(d=>{ const b=document.createElement('button'); b.className='em'; b.dataset.s=d.id; b.title=d.name; b.innerHTML=insectSVG(d.id);
+    b.onclick=()=>{ st.shape=d.id; [...bar.querySelectorAll('.em')].forEach(x=>x.classList.toggle('on',x.dataset.s===d.id)); save(); buzz(6); }; bar.appendChild(b); }); })();
 (function(){ const bar=document.getElementById('colorBar');
   COLORS.forEach(c=>{ const b=document.createElement('button'); b.className='sw'; b.dataset.c=c; b.style.background=c;
-    b.onclick=()=>{ st.color=c; st.rainbow=false; markColors(); save(); buzz(6); }; bar.appendChild(b); });
-  const rb=document.createElement('button'); rb.className='sw rb'; rb.dataset.c='rainbow'; rb.title='무지개';
-  rb.onclick=()=>{ st.rainbow=true; markColors(); save(); buzz(6); }; bar.appendChild(rb); })();
+    b.onclick=()=>{ st.color=c; st.rainbow=false; if(selIdx!=null&&spots[selIdx]){ spots[selIdx].color=c; spots[selIdx].rainbow=false; renderMarkers(); } markColors(); save(); buzz(6); }; bar.appendChild(b); });
+  const rb=document.createElement('button'); rb.className='sw rb'; rb.dataset.c='rainbow'; rb.title='레인보우';
+  rb.onclick=()=>{ st.rainbow=true; if(selIdx!=null&&spots[selIdx]){ spots[selIdx].rainbow=true; renderMarkers(); } markColors(); save(); buzz(6); }; bar.appendChild(rb); })();
 function markColors(){ [...document.querySelectorAll('#colorBar .sw')].forEach(b=>{
-  const on = b.dataset.c==='rainbow' ? st.rainbow : (!st.rainbow && b.dataset.c===st.color); b.classList.toggle('on',on); }); }
+  const on=b.dataset.c==='rainbow'?st.rainbow:(!st.rainbow&&b.dataset.c===st.color); b.classList.toggle('on',on); }); }
 
-/* ===== 캔버스/불꽃 ===== */
-const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
-const stage=document.getElementById('stage');
-let W=0,H=0,dpr=1;
-function resize(){ dpr=Math.min(2,window.devicePixelRatio||1); W=stage.clientWidth; H=stage.clientHeight;
-  cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
-window.addEventListener('resize',resize);
+/* ===== 스테이지/불꽃 ===== */
+const stage=document.getElementById('stage'), fx=document.getElementById('fx'), hint=document.getElementById('hint');
+let W=0,H=0; const FWS=150;
+function resize(){ W=stage.clientWidth; H=stage.clientHeight; }
+window.addEventListener('resize',()=>{ resize(); renderMarkers(); });
 
-const shapeCache={};
-function shapePoints(ch){
-  if(shapeCache[ch]) return shapeCache[ch];
-  let norm=[];
-  try{
-    const S=72, c=document.createElement('canvas'); c.width=c.height=S; const g=c.getContext('2d');
-    g.clearRect(0,0,S,S); g.textAlign='center'; g.textBaseline='middle'; g.font=(S-16)+'px serif';
-    g.fillText(ch,S/2,S/2+2);
-    const img=g.getImageData(0,0,S,S).data; const pts=[];
-    for(let y=0;y<S;y+=3) for(let x=0;x<S;x+=3){ if(img[(y*S+x)*4+3]>96) pts.push([x,y]); }
-    if(pts.length>10){
-      let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
-      pts.forEach(([x,y])=>{mnx=Math.min(mnx,x);mny=Math.min(mny,y);mxx=Math.max(mxx,x);mxy=Math.max(mxy,y);});
-      const cx=(mnx+mxx)/2, cy=(mny+mxy)/2, sc=Math.max(mxx-mnx,mxy-mny)/2||1;
-      const step=Math.max(1,Math.floor(pts.length/56));
-      for(let i=0;i<pts.length;i+=step){ const [x,y]=pts[i]; norm.push([(x-cx)/sc,(y-cy)/sc]); }
-    }
-  }catch(e){}
-  if(norm.length<12){ norm=[]; for(let i=0;i<44;i++){ const a=i/44*Math.PI*2; norm.push([Math.cos(a),Math.sin(a)]); } }
-  shapeCache[ch]=norm; return norm;
-}
-
-let spots=[];          // 놓은 불꽃 {x,y,shape,color,rainbow}
-let shells=[];         // 올라가는 중
-let parts=[];          // 터진 입자
-let running=false, tPulse=0;
+let spots=[]; let running=false; let selIdx=null;
 
 stage.addEventListener('pointerdown',function(e){
   if(e.target.closest('button')) return;
-  const r=cv.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
-  if(y> H*0.9) return;
-  if(spots.length>=18) spots.shift();
+  if(running) return;
+  const m=e.target.closest('.fw.marker');
+  if(m){ selIdx=+m.dataset.i; renderMarkers(); buzz(6); return; }   // 놓은 곤충 선택
+  const r=stage.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
+  if(y>H*0.86) return;
+  if(spots.length>=16) spots.shift();
   spots.push({x,y,shape:st.shape,color:st.color,rainbow:st.rainbow});
-  buzz(8);
+  selIdx=spots.length-1;   // 새로 놓으면 자동 선택
+  renderMarkers(); buzz(8);
 });
 
-function burst(sh){
-  boom();
-  const pts=shapePoints(sh.shape);
-  const R=Math.min(W,H)*0.18;
-  const baseHue=Math.random()*360;
-  pts.forEach(([nx,ny])=>{
-    const ox=nx*R, oy=ny*R, k=0.16;
-    parts.push({x:sh.x,y:sh.y,px:sh.x,py:sh.y,vx:ox*k,vy:oy*k,g:0.055,drag:0.9,life:0,max:58+Math.random()*22,
-      col:sh.color, hue: sh.rainbow?((Math.atan2(ny,nx)*180/Math.PI+baseHue+360)%360):null, r:2.4+Math.random()*1.3});
+function styleColor(el,sp){ if(sp.rainbow){ el.classList.add('rainbow'); el.style.color=''; } else { el.classList.remove('rainbow'); el.style.color=sp.color; } }
+
+function renderMarkers(){
+  [...fx.querySelectorAll('.marker')].forEach(n=>n.remove());
+  spots.forEach((sp,i)=>{
+    const w=document.createElement('div'); w.className='fw marker'+(i===selIdx?' sel':''); w.dataset.i=i;
+    w.style.left=(sp.x-FWS/2)+'px'; w.style.top=(sp.y-FWS/2)+'px'; w.innerHTML=insectSVG(sp.shape); styleColor(w,sp); fx.appendChild(w);
   });
-  for(let i=0;i<20;i++){ const a=Math.random()*6.283, s=Math.random()*R; 
-    parts.push({x:sh.x,y:sh.y,px:sh.x,py:sh.y,vx:Math.cos(a)*s*0.12,vy:Math.sin(a)*s*0.12,g:0.055,drag:0.9,life:0,max:40+Math.random()*22,
-      col:sh.color, hue: sh.rainbow?((baseHue+i*18)%360):null, r:1.7}); }
 }
 
-function drawMarkers(){
-  ctx.save(); ctx.globalCompositeOperation='source-over';
-  const pulse=0.5+0.5*Math.sin(tPulse*0.12);
-  spots.forEach(sp=>{
-    ctx.globalAlpha=0.35; ctx.strokeStyle='#ffffff'; ctx.lineWidth=1; ctx.setLineDash([4,5]);
-    ctx.beginPath(); ctx.moveTo(sp.x,H); ctx.lineTo(sp.x,sp.y); ctx.stroke(); ctx.setLineDash([]);
-    ctx.globalAlpha=0.55+0.35*pulse; ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(sp.shape,sp.x,sp.y);
-    ctx.globalAlpha=0.9; ctx.fillStyle= sp.rainbow?'#ffd93d':sp.color; ctx.beginPath(); ctx.arc(sp.x,H-6,3,0,6.283); ctx.fill();
-  });
-  ctx.restore();
-}
+function ring(sp){ const r=document.createElement('div'); r.className='ring'; r.style.left=sp.x+'px'; r.style.top=sp.y+'px'; r.style.borderColor=sp.rainbow?'#ffd93d':sp.color; fx.appendChild(r); setTimeout(()=>r.remove(),640); }
 
-function frame(){
-  tPulse++;
-  ctx.clearRect(0,0,W,H);
-  ctx.globalCompositeOperation='lighter';
-  // 올라가는 불꽃
-  for(const s of shells){ if(s.state!=='rising') continue;
-    s.py=s.y; s.y-=s.vy; s.vy*=0.995;
-    ctx.strokeStyle='rgba(255,235,180,0.9)'; ctx.lineWidth=2.4; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(s.x,s.py); ctx.lineTo(s.x,s.y); ctx.stroke();
-    ctx.globalAlpha=0.9; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(s.x,s.y,2.2,0,6.283); ctx.fill(); ctx.globalAlpha=1;
-    if(s.y<=s.ty){ s.state='done'; burst(s); }
-  }
-  shells=shells.filter(s=>s.state==='rising');
-  // 입자
-  for(const p of parts){ p.px=p.x; p.py=p.y; p.vx*=p.drag; p.vy*=p.drag; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life++;
-    const a=1-p.life/p.max; if(a<=0){ p.dead=1; continue; }
-    ctx.strokeStyle = p.hue!=null ? ('hsl('+p.hue+' 95% '+(56+22*a)+'%)') : p.col;
-    ctx.globalAlpha=Math.max(0,a); ctx.lineWidth=p.r; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(p.px,p.py); ctx.lineTo(p.x,p.y); ctx.stroke();
-  }
-  parts=parts.filter(p=>!p.dead);
-  ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
-  if(!running || spots.length) drawMarkers();
-  requestAnimationFrame(frame);
-}
+function fire(sp,delay){ setTimeout(()=>{
+  whoosh();
+  const startY=(H-sp.y)+FWS*0.6+10;
+  const w=document.createElement('div'); w.className='fw'; w.style.left=(sp.x-FWS/2)+'px'; w.style.top=(sp.y-FWS/2)+'px'; w.innerHTML=insectSVG(sp.shape); styleColor(w,sp);
+  w.style.transform='translateY('+startY+'px) scale(.5)'; w.style.opacity='0.95'; fx.appendChild(w);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+    w.style.transition='transform .6s cubic-bezier(.2,.75,.25,1)'; w.style.transform='translateY(0) scale(.85)';
+  }); });
+  setTimeout(()=>{ boom(); ring(sp);
+    w.style.transition='transform .8s ease-out, opacity .8s ease-out';
+    w.style.transform='translateY(0) scale(2.4)'; w.style.opacity='0';
+    setTimeout(()=>w.remove(),820);
+  }, 630);
+}, delay); }
 
 function launch(){
   if(running) return;
-  if(spots.length===0){ for(let i=0;i<5;i++){ spots.push({x:W*(0.15+Math.random()*0.7),y:H*(0.2+Math.random()*0.35),shape:st.shape,color:st.color,rainbow:st.rainbow}); } }
-  running=true; goBtn.disabled=true; hint.style.display='none';
+  if(spots.length===0){ for(let i=0;i<5;i++) spots.push({x:W*(0.15+Math.random()*0.7),y:H*(0.2+Math.random()*0.38),shape:st.shape,color:st.color,rainbow:st.rainbow}); renderMarkers(); }
+  running=true; goBtn.disabled=true; hint.style.display='none'; selIdx=null; renderMarkers();
   const list=spots.slice();
-  list.forEach((sp,i)=>{ setTimeout(()=>{ whoosh();
-    shells.push({x:sp.x,y:H,py:H,ty:sp.y,vy:Math.max(6,(H-sp.y)/40),state:'rising',shape:sp.shape,color:sp.color,rainbow:sp.rainbow});
-  }, i*300); });
-  setTimeout(()=>{ running=false; goBtn.disabled=false; }, list.length*300+1800);
+  list.forEach((sp,i)=>fire(sp, i*320));
+  setTimeout(()=>{ running=false; goBtn.disabled=false; }, list.length*320+1700);
 }
 
-const goBtn=document.getElementById('goBtn'), hint=document.getElementById('hint');
+const goBtn=document.getElementById('goBtn');
 goBtn.addEventListener('click',()=>{ ac(); launch(); buzz(12); });
-document.getElementById('clrBtn').addEventListener('click',()=>{ spots=[]; parts=[]; shells=[]; hint.style.display=''; buzz([10,30]); });
+document.getElementById('clrBtn').addEventListener('click',()=>{ spots=[]; selIdx=null; [...fx.children].forEach(n=>n.remove()); hint.style.display=''; buzz([10,30]); });
 
 const rov=document.getElementById('rov');
 document.getElementById('rulesFab').onclick=()=>rov.classList.add('show');
 document.getElementById('rovClose').onclick=()=>rov.classList.remove('show');
 rov.onclick=e=>{ if(e.target===rov) rov.classList.remove('show'); };
 
-/* 시작 */
 function boot(){ resize(); setSeason(st.season);
   [...document.querySelectorAll('#shapeBar .em')].forEach(x=>x.classList.toggle('on',x.dataset.s===st.shape));
-  markColors(); requestAnimationFrame(frame); }
+  markColors(); }
 if(document.readyState!=='loading') boot(); else window.addEventListener('DOMContentLoaded',boot);
-setTimeout(resize,200); setTimeout(resize,600);
+setTimeout(()=>{resize();},200); setTimeout(()=>{resize();},600);
 </script>
 
 <script id="framelink">
