@@ -342,7 +342,7 @@
           <div class="ic">🖍️</div>
           <div class="ct">
             <div class="cname">곤충 색칠놀이</div>
-            <div class="cdesc">왼쪽 <b>예시</b>를 보고 오른쪽 그림을 색칠해요! 나비·무당벌레·꿀벌·애벌레 등 <b>9가지 곤충</b>, <b>🌈무지개·🪣다 칠하기·레인보우 물감</b>까지. 그림마다 저장돼요. <span class="orig">오리지널 창작</span></div>
+            <div class="cdesc">왼쪽 <b>예시</b>를 보고 오른쪽 그림을 색칠해요! 나비·사마귀·장수풍뎅이·하늘소 등 <b>15가지 곤충</b>, 칠하면 <b>뾱!</b> 소리와 <b>🌈레인보우 물감</b>까지. 그림마다 저장돼요. <span class="orig">오리지널 창작</span></div>
           </div>
           <div class="cgo">놀러가기 →</div>
         </button>
@@ -13082,6 +13082,97 @@ const DRAW=[
   <circle class="rg" cx="66" cy="106" r="7"/><circle class="dot" cx="66" cy="106" r="3"/>
   <path class="ln sm" d="M56 118 Q64 123 74 119"/>
   <path class="ln lg" d="M132 138 C 128 160 132 176 140 190"/>`},
+
+ {id:"pillbug",name:"공벌레",emoji:"🪳",
+  sample:["#8a94a0","#9aa4b0","#7a8794","#9aa4b0","#7a8794","#9aa4b0","#7a8794"],
+  svg:`
+  <defs><clipPath id="pillClip"><ellipse cx="110" cy="120" rx="54" ry="72"/></clipPath></defs>
+  <path class="ln" d="M60 78 L42 70 M58 104 L38 102 M60 132 L40 134 M62 160 L44 168"/>
+  <path class="ln" d="M160 78 L178 70 M162 104 L182 102 M160 132 L180 134 M158 160 L176 168"/>
+  <g clip-path="url(#pillClip)">
+    <rect class="rg" x="54" y="48" width="112" height="26"/>
+    <rect class="rg" x="54" y="74" width="112" height="20"/>
+    <rect class="rg" x="54" y="94" width="112" height="20"/>
+    <rect class="rg" x="54" y="114" width="112" height="20"/>
+    <rect class="rg" x="54" y="134" width="112" height="20"/>
+    <rect class="rg" x="54" y="154" width="112" height="20"/>
+    <rect class="rg" x="54" y="174" width="112" height="26"/>
+  </g>
+  <ellipse class="ln" cx="110" cy="120" rx="54" ry="72"/>
+  <path class="ln" d="M96 46 C 92 34 90 28 86 22 M124 46 C 128 34 130 28 134 22"/>
+  <circle class="dot" cx="86" cy="21" r="3.2"/><circle class="dot" cx="134" cy="21" r="3.2"/>
+  <circle class="dot" cx="98" cy="60" r="3"/><circle class="dot" cx="122" cy="60" r="3"/>
+  <path class="ln sm" d="M100 68 Q110 73 120 68"/>`},
+
+ {id:"centipede",name:"지네",emoji:"🦂",
+  sample:["#b5602a","#d97a3a","#c0642f","#d97a3a","#c0642f","#d97a3a","#c0642f","#d97a3a"],
+  svg:`
+  <path class="ln" d="M52 92 L44 74 M78 96 L72 76 M104 92 L100 72 M130 96 L126 76 M156 92 L152 74 M182 96 L178 78"/>
+  <path class="ln" d="M52 132 L44 150 M78 136 L72 156 M104 132 L100 152 M130 136 L126 156 M156 132 L152 150 M182 136 L178 154"/>
+  <circle class="rg" cx="196" cy="114" r="18"/><circle class="rg" cx="170" cy="116" r="20"/>
+  <circle class="rg" cx="144" cy="112" r="20"/><circle class="rg" cx="118" cy="116" r="20"/>
+  <circle class="rg" cx="92" cy="112" r="20"/><circle class="rg" cx="66" cy="116" r="20"/>
+  <circle class="rg" cx="42" cy="112" r="20"/><circle class="rg" cx="26" cy="110" r="18"/>
+  <path class="ln" d="M18 96 C 10 82 8 74 4 66 M26 92 C 24 78 26 70 24 62"/>
+  <circle class="dot" cx="5" cy="65" r="3"/><circle class="dot" cx="24" cy="61" r="3"/>
+  <circle class="dot" cx="20" cy="108" r="2.8"/><circle class="dot" cx="30" cy="108" r="2.8"/>
+  <path class="ln sm" d="M18 116 Q26 120 34 116"/>`},
+
+ {id:"mantis",name:"사마귀",emoji:"🦗",
+  sample:["#a8e05f","#a8e05f","#8fd07a","#7bc47b","#6cbf4a","#6cbf4a","#6cbf4a","#ffd93d","#ffd93d"],
+  svg:`
+  <path class="ln lg" d="M118 150 C 140 156 156 172 160 190 M116 168 C 132 176 144 186 150 196"/>
+  <ellipse class="rg" cx="94" cy="150" rx="16" ry="46" transform="rotate(-8 94 150)"/>
+  <ellipse class="rg" cx="126" cy="150" rx="16" ry="46" transform="rotate(8 126 150)"/>
+  <ellipse class="rg" cx="110" cy="158" rx="20" ry="44"/>
+  <rect class="rg" x="103" y="60" width="14" height="66" rx="7"/>
+  <path class="rg" d="M104 76 C 86 72 74 58 78 42 C 80 34 88 38 88 48 C 88 60 96 70 106 74 Z"/>
+  <path class="rg" d="M116 76 C 134 72 146 58 142 42 C 140 34 132 38 132 48 C 132 60 124 70 114 74 Z"/>
+  <path class="rg" d="M110 34 L130 60 Q110 68 90 60 Z"/>
+  <circle class="rg" cx="97" cy="52" r="7"/><circle class="rg" cx="123" cy="52" r="7"/>
+  <circle class="dot" cx="97" cy="52" r="2.6"/><circle class="dot" cx="123" cy="52" r="2.6"/>
+  <path class="ln" d="M104 36 C 100 26 98 22 96 16 M116 36 C 120 26 122 22 124 16"/>
+  <path class="ln sm" d="M102 62 Q110 66 118 62"/>`},
+
+ {id:"rhinobeetle",name:"장수풍뎅이",emoji:"🦏",
+  sample:["#3a3a3a","#4a4a4a","#5a3a1b","#6a4a24","#6a4a24"],
+  svg:`
+  <path class="ln lg" d="M80 96 L52 86 M78 120 L48 120 M82 150 L56 166 M140 96 L168 86 M142 120 L172 120 M138 150 L164 166"/>
+  <path class="rg" d="M104 50 C 100 30 96 16 92 8 C 90 3 97 2 100 11 C 103 20 106 30 110 36 C 114 30 117 20 120 11 C 123 2 130 3 128 8 C 124 16 120 30 116 50 Z"/>
+  <ellipse class="rg" cx="110" cy="58" rx="17" ry="13"/>
+  <ellipse class="rg" cx="110" cy="86" rx="32" ry="24"/>
+  <path class="rg" d="M110 104 C 78 104 66 132 70 160 C 74 184 92 196 110 196 Z"/>
+  <path class="rg" d="M110 104 C 142 104 154 132 150 160 C 146 184 128 196 110 196 Z"/>
+  <path class="ln" d="M110 106 L110 194"/>
+  <circle class="dot" cx="102" cy="58" r="2.6"/><circle class="dot" cx="118" cy="58" r="2.6"/>`},
+
+ {id:"cicada",name:"매미",emoji:"🎵",
+  sample:["#d8eef2","#d8eef2","#6a8a4a","#4a6a2a","#5a7a3a","#c0642f","#c0642f"],
+  svg:`
+  <ellipse class="rg" cx="78" cy="132" rx="20" ry="64" transform="rotate(-12 78 132)"/>
+  <ellipse class="rg" cx="142" cy="132" rx="20" ry="64" transform="rotate(12 142 132)"/>
+  <path class="rg" d="M92 96 L128 96 L118 176 Q110 187 102 176 Z"/>
+  <ellipse class="rg" cx="110" cy="86" rx="24" ry="22"/>
+  <ellipse class="rg" cx="110" cy="54" rx="24" ry="17"/>
+  <circle class="rg" cx="90" cy="52" r="8"/><circle class="rg" cx="130" cy="52" r="8"/>
+  <circle class="dot" cx="90" cy="52" r="3"/><circle class="dot" cx="130" cy="52" r="3"/>
+  <path class="ln sm" d="M101 60 Q110 65 119 60"/>
+  <path class="ln" d="M104 40 C 100 32 98 28 96 22 M116 40 C 120 32 122 28 124 22"/>`},
+
+ {id:"longhorn",name:"하늘소",emoji:"🪲",
+  sample:["#3a3a3a","#3a3a3a","#6a86a8","#6a86a8","#2a2a2a","#2a2a2a","#2a2a2a","#2a2a2a"],
+  svg:`
+  <path class="ln lg" d="M100 44 C 84 30 70 20 58 8 C 52 3 48 6 54 12 C 66 24 80 34 96 46"/>
+  <path class="ln lg" d="M120 44 C 136 30 150 20 162 8 C 168 3 172 6 166 12 C 154 24 140 34 124 46"/>
+  <path class="ln lg" d="M78 110 L50 104 M80 140 L52 142 M82 168 L58 182 M142 110 L170 104 M140 140 L168 142 M138 168 L162 182"/>
+  <ellipse class="rg" cx="110" cy="56" rx="18" ry="15"/>
+  <ellipse class="rg" cx="110" cy="84" rx="26" ry="20"/>
+  <path class="rg" d="M110 100 C 76 100 64 130 68 162 C 72 188 92 200 110 200 Z"/>
+  <path class="rg" d="M110 100 C 144 100 156 130 152 162 C 148 188 128 200 110 200 Z"/>
+  <circle class="rg" cx="96" cy="126" r="9"/><circle class="rg" cx="124" cy="126" r="9"/>
+  <circle class="rg" cx="98" cy="164" r="8"/><circle class="rg" cx="122" cy="164" r="8"/>
+  <path class="ln" d="M110 102 L110 198"/>
+  <circle class="dot" cx="103" cy="56" r="2.6"/><circle class="dot" cx="117" cy="56" r="2.6"/>`},
 ];
 
 /* ===== 색 팔레트 ===== */
@@ -13106,6 +13197,26 @@ function cget(id){ if(!data.draw[id]) data.draw[id]={colors:{},done:0}; return d
 let hap=true;
 window.addEventListener('message',e=>{const d=e.data; if(d&&d.type==='haptics') hap=!!d.on;});
 function buzz(p){ if(!hap) return; try{ if(window.parent&&window.parent!==window){ parent.postMessage({type:'buzz',p:p},'*'); return; } }catch(e){} try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+
+/* ===== 뾱 소리 (색칠할 때) ===== */
+let _ac=null;
+function pop(){
+  if(!hap) return;                    /* 🔔 끄면 진동과 함께 소리도 꺼짐 */
+  try{
+    _ac=_ac||new (window.AudioContext||window.webkitAudioContext)();
+    if(_ac.state==='suspended') _ac.resume();
+    const t=_ac.currentTime, f0=360+Math.random()*90;
+    const o=_ac.createOscillator(), g=_ac.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(f0,t);
+    o.frequency.exponentialRampToValueAtTime(f0*3.1,t+0.06);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.28,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);
+    o.connect(g); g.connect(_ac.destination);
+    o.start(t); o.stop(t+0.17);
+  }catch(e){}
+}
 
 /* ===== 예시색 적용 ===== */
 function applySample(svgEl,d){ const rs=svgEl.querySelectorAll('.rg'); const s=d.sample||[];
@@ -13162,20 +13273,20 @@ function paint(el){
   history.push([{el,prev}]); if(history.length>60) history.shift();
   el.setAttribute('fill',color);
   storeColor(el.dataset.r,color);
-  sparkle(el); buzz(7);
+  sparkle(el); buzz(7); pop();
 }
 function storeColor(i,c){ const st=cget(cur); if(c===WHITE) delete st.colors[i]; else st.colors[i]=c; save(); }
 
 function fillAll(){
   const batch=[];
   regions.forEach(el=>{ const prev=el.getAttribute('fill'); if(prev!==color){ batch.push({el,prev}); el.setAttribute('fill',color); storeColor(el.dataset.r,color);} });
-  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,12]); }
+  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,12]); pop(); }
 }
 function rainbow(){
   const batch=[]; let k=Math.floor(Math.random()*COLORS.length);
   regions.forEach(el=>{ const prev=el.getAttribute('fill'); const c=COLORS[k%COLORS.length]; k+=3+Math.floor(Math.random()*4);
     if(prev!==c){ batch.push({el,prev}); el.setAttribute('fill',c); storeColor(el.dataset.r,c);} });
-  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,10,30,14]); }
+  if(batch.length){ history.push(batch); if(history.length>60) history.shift(); buzz([10,30,10,30,14]); pop(); }
 }
 function undo(){ if(!history.length){ buzz(20); return; } const batch=history.pop();
   batch.forEach(({el,prev})=>{ el.setAttribute('fill',prev); storeColor(el.dataset.r,prev); }); buzz(9); }
