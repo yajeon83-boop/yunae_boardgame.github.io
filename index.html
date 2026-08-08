@@ -13515,19 +13515,13 @@ renderPick(); renderPal(); loadArt(cur);
   .fw{position:absolute;width:150px;height:150px;pointer-events:none;will-change:transform,opacity;
     filter:drop-shadow(0 0 6px rgba(255,255,255,.28));}
   .fw svg{width:100%;height:100%;overflow:visible;display:block;}
-  .fw svg .rg,.fw svg .ln{fill:none;stroke:currentColor;stroke-width:6;stroke-dasharray:3 9;stroke-linecap:round;stroke-linejoin:round;}
-  .fw svg .dot,.fw svg .sh{fill:currentColor;}
+  .fw svg .rg,.fw svg .ln{fill:none;stroke:var(--st,currentColor);stroke-width:6;stroke-dasharray:3 9;stroke-linecap:round;stroke-linejoin:round;}
+  .fw svg .dot,.fw svg .sh{fill:var(--st,currentColor);}
   .fw.marker{transform:scale(.92);opacity:.9;pointer-events:auto;cursor:pointer;}
   .fw.marker.sel{opacity:1;transform:scale(1.02);filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #ffd23d);}
-  .fw.rainbow{animation:rbcolor 1.1s linear infinite;}
-  @keyframes rbcolor{0%{color:#ff5b5b}16%{color:#ff9f43}33%{color:#ffd93d}50%{color:#4cc46a}66%{color:#35d0c0}83%{color:#5ec6ff}100%{color:#a97bf0}}
-  .trail{position:absolute;width:3px;margin-left:-1.5px;background:linear-gradient(to top,transparent,#fff);
-    opacity:.8;border-radius:2px;pointer-events:none;}
   .ring{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:3px solid #fff;
-    opacity:.9;transform:scale(.3);animation:ringpop .62s ease-out forwards;pointer-events:none;}
-  @keyframes ringpop{to{transform:scale(9);opacity:0;}}
-  .mline{position:absolute;width:0;border-left:2px dashed rgba(255,255,255,.38);pointer-events:none;}
-  .mdot{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,.5);}
+    opacity:.9;transform:scale(.3);animation:ringpop .72s ease-out forwards;pointer-events:none;}
+  @keyframes ringpop{to{transform:scale(10);opacity:0;}}
   .hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:13px;color:#fff;
     text-shadow:0 1px 4px rgba(0,0,0,.6);pointer-events:none;opacity:.92;}
 
@@ -13547,6 +13541,12 @@ renderPick(); renderPal(); loadArt(cur);
   .rcard button{margin-top:14px;width:100%;border:none;background:#ff7a3d;color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:11px;cursor:pointer;}
 </style></head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="rbg" gradientUnits="userSpaceOnUse" x1="0" y1="16" x2="200" y2="212">
+      <stop offset="0" stop-color="#ff5b5b"/><stop offset="0.18" stop-color="#ff9f43"/><stop offset="0.36" stop-color="#ffd93d"/>
+      <stop offset="0.54" stop-color="#4cc46a"/><stop offset="0.7" stop-color="#35d0c0"/><stop offset="0.85" stop-color="#5ec6ff"/>
+      <stop offset="1" stop-color="#a97bf0"/></linearGradient>
+  </defs></svg>
   <div class="bar" id="seasonBar"><span class="lb">배경</span></div>
   <div class="bar" id="shapeBar"><span class="lb">불꽃 곤충</span></div>
   <div class="bar" id="colorBar"><span class="lb">라인 색</span></div>
@@ -13604,16 +13604,16 @@ function boom(){ if(!hap) return; const a=ac(); if(!a) return;
     for(let i=0;i<3;i++){ pop1(a, t+i*0.11, 950+Math.random()*450 - i*120); }
   }catch(e){}
 }
-/* 슈~~웅 (상승) */
+/* 슈~~웅 (상승, 느리게) */
 function whoosh(){ if(!hap) return; const a=ac(); if(!a) return; try{ const t=a.currentTime;
-  const src=a.createBufferSource(); src.buffer=wnoise(a);
-  const bp=a.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=7;
-  bp.frequency.setValueAtTime(480,t); bp.frequency.exponentialRampToValueAtTime(2700,t+0.55);
-  const g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.13,t+0.09); g.gain.exponentialRampToValueAtTime(0.0001,t+0.62);
-  src.connect(bp); bp.connect(g); g.connect(a.destination); src.start(t); src.stop(t+0.64);
-  const o=a.createOscillator(),og=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(320,t); o.frequency.exponentialRampToValueAtTime(1050,t+0.5);
-  og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.04,t+0.1); og.gain.exponentialRampToValueAtTime(0.0001,t+0.55);
-  o.connect(og); og.connect(a.destination); o.start(t); o.stop(t+0.56);
+  const src=a.createBufferSource(); src.buffer=wnoise(a); src.loop=true;
+  const bp=a.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=8;
+  bp.frequency.setValueAtTime(360,t); bp.frequency.exponentialRampToValueAtTime(2600,t+1.35);
+  const g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.12,t+0.12); g.gain.setValueAtTime(0.12,t+1.15); g.gain.exponentialRampToValueAtTime(0.0001,t+1.5);
+  src.connect(bp); bp.connect(g); g.connect(a.destination); src.start(t); src.stop(t+1.52);
+  const o=a.createOscillator(),og=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(260,t); o.frequency.exponentialRampToValueAtTime(1000,t+1.3);
+  og.gain.setValueAtTime(0.0001,t); og.gain.exponentialRampToValueAtTime(0.035,t+0.15); og.gain.exponentialRampToValueAtTime(0.0001,t+1.45);
+  o.connect(og); og.connect(a.destination); o.start(t); o.stop(t+1.48);
 }catch(e){} }
 
 /* ===== 계절 배경 ===== */
@@ -13863,7 +13863,7 @@ stage.addEventListener('pointerdown',function(e){
   renderMarkers(); buzz(8);
 });
 
-function styleColor(el,sp){ if(sp.rainbow){ el.classList.add('rainbow'); el.style.color=''; } else { el.classList.remove('rainbow'); el.style.color=sp.color; } }
+function styleColor(el,sp){ if(sp.rainbow){ el.style.color='#fff'; el.style.setProperty('--st','url(#rbg)'); } else { el.style.removeProperty('--st'); el.style.color=sp.color; } }
 
 function renderMarkers(){
   [...fx.querySelectorAll('.marker')].forEach(n=>n.remove());
@@ -13873,30 +13873,39 @@ function renderMarkers(){
   });
 }
 
-function ring(sp){ const r=document.createElement('div'); r.className='ring'; r.style.left=sp.x+'px'; r.style.top=sp.y+'px'; r.style.borderColor=sp.rainbow?'#ffd93d':sp.color; fx.appendChild(r); setTimeout(()=>r.remove(),640); }
+function ring(sp){ const r=document.createElement('div'); r.className='ring'; r.style.left=sp.x+'px'; r.style.top=sp.y+'px'; r.style.borderColor=sp.rainbow?'#ffd93d':sp.color; fx.appendChild(r); setTimeout(()=>r.remove(),720); }
 
+const RISE=1600, BURST=650;   // 상승은 천천히, 터진 뒤엔 바로 서서히 사라짐
 function fire(sp,delay){ setTimeout(()=>{
   whoosh();
   const startY=(H-sp.y)+FWS*0.6+10;
   const w=document.createElement('div'); w.className='fw'; w.style.left=(sp.x-FWS/2)+'px'; w.style.top=(sp.y-FWS/2)+'px'; w.innerHTML=insectSVG(sp.shape); styleColor(w,sp);
   w.style.transform='translateY('+startY+'px) scale(.5)'; w.style.opacity='0.95'; fx.appendChild(w);
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
-    w.style.transition='transform .6s cubic-bezier(.2,.75,.25,1)'; w.style.transform='translateY(0) scale(.85)';
+    w.style.transition='transform '+RISE+'ms cubic-bezier(.15,.6,.3,1)'; w.style.transform='translateY(0) scale(.85)';
   }); });
   setTimeout(()=>{ boom(); ring(sp);
-    w.style.transition='transform .8s ease-out, opacity .8s ease-out';
-    w.style.transform='translateY(0) scale(2.4)'; w.style.opacity='0';
-    setTimeout(()=>w.remove(),820);
-  }, 630);
+    w.style.transition='transform '+BURST+'ms cubic-bezier(.12,.6,.3,1), opacity '+BURST+'ms ease-out';
+    w.style.transform='translateY(0) scale(2.7)'; w.style.opacity='0';   // 커지며 서서히 사라짐
+    setTimeout(()=>w.remove(),BURST+40);
+  }, RISE);
 }, delay); }
 
 function launch(){
   if(running) return;
   if(spots.length===0){ for(let i=0;i<5;i++) spots.push({x:W*(0.15+Math.random()*0.7),y:H*(0.2+Math.random()*0.38),shape:st.shape,color:st.color,rainbow:st.rainbow}); renderMarkers(); }
-  running=true; goBtn.disabled=true; hint.style.display='none'; selIdx=null; renderMarkers();
+  running=true; goBtn.disabled=true; hint.style.display='none'; selIdx=null;
+  [...fx.querySelectorAll('.marker')].forEach(n=>n.remove());   // 놓아둔 곤충 마커 숨김(불꽃만 보이게)
   const list=spots.slice();
-  list.forEach((sp,i)=>fire(sp, i*320));
-  setTimeout(()=>{ running=false; goBtn.disabled=false; }, list.length*320+1700);
+  const STAGGER=800;                       // 하나씩 천천히
+  list.forEach((sp,i)=>fire(sp, i*STAGGER));
+  const total=(list.length-1)*STAGGER + RISE + BURST + 300;
+  setTimeout(()=>{                         // 다 터지면 자동 클리어
+    running=false; goBtn.disabled=false;
+    spots=[]; selIdx=null;
+    [...fx.children].forEach(n=>n.remove());
+    hint.style.display='';
+  }, total);
 }
 
 const goBtn=document.getElementById('goBtn');
