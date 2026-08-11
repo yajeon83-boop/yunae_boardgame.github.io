@@ -119,6 +119,10 @@
   .game-card.story .cdesc{color:#fde6cf;}
   .game-card.story .cgo{background:#fff;color:#b5651d;box-shadow:0 3px 0 #e6dcc8;}
   .game-card.story::after{content:"📖";position:absolute;right:-2px;bottom:-12px;font-size:80px;opacity:.18;transform:rotate(8deg);}
+  .game-card.piano{background:linear-gradient(160deg,#3a2a6a,#5a3a8a 55%,#7a4a9a);color:#fff;border:2px solid #6a4a9a;}
+  .game-card.piano .cdesc{color:#e8dcff;}
+  .game-card.piano .cgo{background:#ffd23d;color:#4a2a10;box-shadow:0 3px 0 #c79a1f;}
+  .game-card.piano::after{content:"🎹";position:absolute;right:-4px;bottom:-12px;font-size:82px;opacity:.2;transform:rotate(-8deg);}
   .game-card.coloring{background:linear-gradient(160deg,#ffe3c2,#ffc1d9 55%,#c9e4ff);color:#5a3a44;border:2px solid #f4b8c8;}
   .game-card.coloring .cdesc{color:#6a4a54;}
   .game-card.coloring .cgo{background:#f2903c;color:#fff;box-shadow:0 3px 0 #c96f1f;}
@@ -355,6 +359,14 @@
           <div class="ct">
             <div class="cname">곤충 불꽃놀이</div>
             <div class="cdesc">봄·여름·가을·겨울 <b>배경</b>을 고르고, <b>곤충 모양</b> 불꽃과 <b>색</b>을 골라 하늘에 톡톡! <b>🎆실행</b>하면 곤충 불꽃이 <b>팡팡</b> 터져요(터지는 소리까지!). <span class="orig">오리지널 창작</span></div>
+          </div>
+          <div class="cgo">놀러가기 →</div>
+        </button>
+        <button class="game-card piano" data-game="piano" aria-label="곤충 피아노 열기">
+          <div class="ic">🎹</div>
+          <div class="ct">
+            <div class="cname">곤충 피아노</div>
+            <div class="cdesc">도레미 라벨과 <b>🌈무지개 건반</b>, 여러 손가락 <b>동시 연주</b>! 옥타브도 바꾸고 <b>⭐작은별 따라치기</b>까지. <span class="orig">오리지널 창작</span></div>
           </div>
           <div class="cgo">놀러가기 →</div>
         </button>
@@ -13932,6 +13944,358 @@ setTimeout(()=>{resize();},200); setTimeout(()=>{resize();},600);
 </template>
 </template>
 
+  <template id="tpl-piano"><!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>곤충 피아노</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+    background:linear-gradient(160deg,#2a2350,#3a2a6a 60%,#5a3a8a);color:#fff;display:flex;flex-direction:column;
+    min-height:100%;overflow:hidden;user-select:none;-webkit-user-select:none;}
+
+  .bar{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:8px 10px;flex:0 0 auto;background:rgba(0,0,0,.18);
+    scrollbar-width:none;}
+  .bar::-webkit-scrollbar{display:none;}
+  .chip{flex:0 0 auto;border:2px solid #6a5aa0;background:#3a3268;color:#eee;border-radius:12px;
+    padding:8px 12px;font-size:14px;font-weight:800;cursor:pointer;transition:.12s;display:inline-flex;align-items:center;gap:5px;}
+  .chip:active{transform:scale(.95);}
+  .chip.on{border-color:#ffd23d;background:#4a3f20;color:#ffe38a;box-shadow:0 0 0 2px rgba(255,210,61,.28);}
+  .oct{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;background:#3a3268;border:2px solid #6a5aa0;border-radius:12px;padding:4px 6px;}
+  .oct button{border:none;background:#5a4f92;color:#fff;font-weight:900;font-size:16px;width:30px;height:30px;border-radius:9px;cursor:pointer;}
+  .oct span{font-size:14px;font-weight:800;min-width:66px;text-align:center;}
+
+  .stage{flex:1;position:relative;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;}
+  .notesLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5;}
+  .pnote{position:absolute;font-size:24px;animation:pfloat .85s ease-out forwards;text-shadow:0 2px 6px rgba(0,0,0,.4);}
+  @keyframes pfloat{0%{opacity:1;transform:translateY(0) scale(.8);}100%{opacity:0;transform:translateY(-70px) scale(1.3);}}
+
+  .kb{position:relative;height:min(64vh,540px);display:flex;flex-direction:column;gap:10px;padding:0 6px 12px;touch-action:none;}
+  .oct-unit{position:relative;flex:1;min-height:0;display:flex;}
+  @media (min-width:760px){ .kb{flex-direction:row;gap:14px;} }
+  .key{position:relative;cursor:pointer;}
+  .key.white{flex:1;margin:0 1px;background:linear-gradient(#ffffff,#f0f0f0);border:1px solid #cececd;border-top:none;
+    border-radius:0 0 10px 10px;box-shadow:inset 0 -7px 0 rgba(0,0,0,.06),0 3px 4px rgba(0,0,0,.18);
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px;color:#9a8fb0;font-weight:800;font-size:16px;}
+  .key.white.down{background:linear-gradient(#ffe6a6,#ffd576);box-shadow:inset 0 -4px 0 rgba(0,0,0,.08),0 2px 3px rgba(0,0,0,.2);transform:translateY(1px);}
+  .key.black{position:absolute;top:0;width:8%;height:62%;background:linear-gradient(#3a3a44,#111);border:1px solid #000;
+    border-radius:0 0 8px 8px;box-shadow:0 5px 7px rgba(0,0,0,.45);color:#cfc7e0;z-index:3;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-size:10px;font-weight:700;}
+  .key.black.down{background:linear-gradient(#ffcf6a,#e0a020);color:#5a3a00;}
+  .key .lbl{pointer-events:none;}
+  .key.guide::after{content:"";position:absolute;inset:0;border-radius:0 0 10px 10px;
+    box-shadow:0 0 0 4px rgba(255,190,50,.9);animation:gpulse .7s ease-in-out infinite;pointer-events:none;}
+  @keyframes gpulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+  .pbug{position:absolute;pointer-events:none;animation:bugfloat 1s ease-out forwards;filter:drop-shadow(0 2px 4px rgba(0,0,0,.32));}
+  .pbug svg{width:100%;height:100%;overflow:visible;display:block;}
+  .pbug svg .rg{stroke:#4a4a4a;stroke-width:3;stroke-linejoin:round;stroke-linecap:round;}
+  .pbug svg .ln{fill:none;stroke:#4a4a4a;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;}
+  .pbug svg .ln.st{stroke:#6a9a3a;} .pbug svg .dot{fill:#4a4a4a;} .pbug svg .sh{fill:#fff;}
+  @keyframes bugfloat{0%{opacity:0;transform:translateY(8px) scale(.5) rotate(0);}18%{opacity:1;transform:translateY(0) scale(1.08) rotate(var(--rot));}100%{opacity:0;transform:translateY(-84px) scale(1.12) rotate(var(--rot));}}
+  .rulesFab{display:none;}
+  .rov{position:fixed;inset:0;background:rgba(10,8,20,.62);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  .rov.show{display:flex;}
+  .rcard{background:#2b2450;border:1px solid #5a4f92;border-radius:20px;padding:20px 22px;max-width:420px;box-shadow:0 14px 44px rgba(0,0,0,.5);}
+  .rcard h2{margin:0 0 10px;color:#ffd23d;font-size:20px;}
+  .rcard p{margin:7px 0;font-size:14.5px;line-height:1.6;color:#e6e0ff;}
+  .rcard button{margin-top:14px;width:100%;border:none;background:#7a5fe0;color:#fff;font-weight:800;font-size:15px;border-radius:12px;padding:11px;cursor:pointer;}
+</style></head>
+<body>
+  <div class="bar" id="bar">
+    <div class="oct"><button id="octDown">◀</button><span id="octLbl">옥타브 4·5</span><button id="octUp">▶</button></div>
+    <button class="chip on" id="labelBtn">도레미</button>
+    <button class="chip" id="rainbowBtn">🌈 무지개건반</button>
+    <button class="chip" id="starBtn">⭐ 작은별</button>
+  </div>
+
+  <div class="stage">
+    <div class="notesLayer" id="notes"></div>
+    <div class="kb" id="kb"></div>
+  </div>
+
+  <button class="rulesFab" id="rulesFab"></button>
+  <div class="rov" id="rov"><div class="rcard">
+    <h2>🎹 곤충 피아노</h2>
+    <p>건반을 <b>톡톡</b> 눌러 연주해요. 여러 손가락으로 <b>동시에</b> 눌러도 돼요!</p>
+    <p><b>◀▶</b>로 옥타브(높낮이)를 바꾸고, <b>도레미</b>로 음이름을 켜고 꺼요.</p>
+    <p><b>🌈무지개건반</b>은 건반을 알록달록하게, <b>⭐작은별</b>은 다음에 누를 건반을 반짝반짝 알려줘요.</p>
+    <button id="rovClose">알았어요!</button>
+  </div></div>
+
+<script>
+/* ===== 진동 ===== */
+let hap=true;
+window.addEventListener('message',e=>{const d=e.data; if(d&&d.type==='haptics') hap=!!d.on;});
+function buzz(p){ if(!hap) return; try{ if(window.parent&&window.parent!==window){ parent.postMessage({type:'buzz',p:p},'*'); return; } }catch(e){} try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+
+/* ===== 오디오 ===== */
+let A=null,master=null;
+function ac(){ if(!A){ try{ A=new (window.AudioContext||window.webkitAudioContext)();
+     const comp=A.createDynamicsCompressor(); master=A.createGain(); master.gain.value=0.55; master.connect(comp); comp.connect(A.destination);
+   }catch(e){} } if(A&&A.state==='suspended') A.resume(); return A; }
+function synth(midi){ const a=ac(); if(!a) return null; const t=a.currentTime; const f=440*Math.pow(2,(midi-69)/12);
+  const o1=a.createOscillator(); o1.type='triangle'; o1.frequency.value=f;
+  const o2=a.createOscillator(); o2.type='sine'; o2.frequency.value=f*2;
+  const g2=a.createGain(); g2.gain.value=0.14;
+  const lp=a.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3400;
+  const g=a.createGain(); g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(0.5,t+0.008); g.gain.exponentialRampToValueAtTime(0.3,t+0.14);
+  o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); lp.connect(master);
+  o1.start(t); o2.start(t);
+  return {o1,o2,g};
+}
+function release(v){ if(!v) return; const a=A; if(!a) return; const t=a.currentTime;
+  try{ v.g.gain.cancelScheduledValues(t); v.g.gain.setValueAtTime(Math.max(0.0001,v.g.gain.value),t);
+    v.g.gain.exponentialRampToValueAtTime(0.0001,t+0.3); v.o1.stop(t+0.32); v.o2.stop(t+0.32); }catch(e){} }
+
+/* ===== 건반 ===== */
+const kb=document.getElementById('kb'), notes=document.getElementById('notes');
+let octave=0;            // C4 기준
+let labelOn=true, rainbow=false;
+const WHITES=[[0,'도'],[2,'레'],[4,'미'],[5,'파'],[7,'솔'],[9,'라'],[11,'시'],[12,'도']];
+const BLACKS=[[1,'도♯',0],[3,'레♯',1],[6,'파♯',3],[8,'솔♯',4],[10,'라♯',5]];
+const VIVID=['#ff3b3b','#ff8a1e','#ffd000','#22c24e','#12c0ae','#2aa3ff','#5b6cff','#c94bf0'];
+const INSECTS=[
+{id:"butterfly",sample:["#ff9f43","#ff9f43","#ff7a5b","#ff7a5b","#ffd93d","#ffffff","#ffd93d","#ffffff","#ffd93d","#ffd93d","#8a5a2b","#8a5a2b"],svg:`
+  <path class="rg" d="M104 92 C 64 52 24 66 26 104 C 28 132 72 130 104 110 Z"/>
+  <path class="rg" d="M116 92 C 156 52 196 66 194 104 C 192 132 148 130 116 110 Z"/>
+  <path class="rg" d="M104 116 C 74 126 46 156 62 184 C 80 210 108 176 108 144 Z"/>
+  <path class="rg" d="M116 116 C 146 126 174 156 158 184 C 140 210 112 176 112 144 Z"/>
+  <circle class="rg" cx="58" cy="88" r="11"/><circle class="rg" cx="48" cy="108" r="7"/>
+  <circle class="rg" cx="162" cy="88" r="11"/><circle class="rg" cx="172" cy="108" r="7"/>
+  <circle class="rg" cx="70" cy="156" r="9"/><circle class="rg" cx="150" cy="156" r="9"/>
+  <ellipse class="rg" cx="110" cy="112" rx="9" ry="46"/><circle class="rg" cx="110" cy="60" r="12"/>
+  <path class="ln" d="M104 52 C 96 36 90 30 82 26"/><path class="ln" d="M116 52 C 124 36 130 30 138 26"/>
+  <circle class="dot" cx="81" cy="25" r="3.4"/><circle class="dot" cx="139" cy="25" r="3.4"/>
+  <circle class="dot" cx="105" cy="60" r="2.6"/><circle class="dot" cx="115" cy="60" r="2.6"/>
+  <path class="ln sm" d="M104 66 Q110 71 116 66"/>`},
+{id:"ladybug",sample:["#4a4a4a","#ff5b5b","#ff5b5b","#4a4a4a","#4a4a4a","#4a4a4a","#4a4a4a","#4a4a4a","#4a4a4a"],svg:`
+  <path class="ln" d="M64 96 L44 84 M60 128 L38 128 M66 158 L46 172"/>
+  <path class="ln" d="M156 96 L176 84 M160 128 L182 128 M154 158 L174 172"/>
+  <ellipse class="rg" cx="110" cy="54" rx="26" ry="19"/>
+  <path class="rg" d="M110 64 C 66 64 50 100 56 138 C 61 170 86 188 110 188 Z"/>
+  <path class="rg" d="M110 64 C 154 64 170 100 164 138 C 159 170 134 188 110 188 Z"/>
+  <circle class="rg" cx="84" cy="102" r="12"/><circle class="rg" cx="80" cy="140" r="11"/><circle class="rg" cx="98" cy="168" r="9"/>
+  <circle class="rg" cx="136" cy="102" r="12"/><circle class="rg" cx="140" cy="140" r="11"/><circle class="rg" cx="122" cy="168" r="9"/>
+  <path class="ln" d="M110 66 L110 186"/>
+  <path class="ln" d="M98 40 C 92 30 90 26 86 22 M122 40 C 128 30 130 26 134 22"/>
+  <circle class="dot" cx="86" cy="21" r="3.4"/><circle class="dot" cx="134" cy="21" r="3.4"/>
+  <circle class="dot" cx="101" cy="56" r="2.8"/><circle class="dot" cx="119" cy="56" r="2.8"/>
+  <path class="ln sm" d="M102 63 Q110 68 118 63"/>`},
+{id:"dragonfly",sample:["#bfe9ff","#bfe9ff","#bfe9ff","#bfe9ff","#4a8ef0","#5ec6ff","#4a8ef0","#5ec6ff","#4a8ef0","#4a8ef0","#35d0c0","#35d0c0"],svg:`
+  <ellipse class="rg" cx="72" cy="86" rx="40" ry="15" transform="rotate(-18 72 86)"/>
+  <ellipse class="rg" cx="148" cy="86" rx="40" ry="15" transform="rotate(18 148 86)"/>
+  <ellipse class="rg" cx="76" cy="116" rx="34" ry="13" transform="rotate(16 76 116)"/>
+  <ellipse class="rg" cx="144" cy="116" rx="34" ry="13" transform="rotate(-16 144 116)"/>
+  <ellipse class="rg" cx="110" cy="70" rx="12" ry="16"/>
+  <rect class="rg" x="101" y="84" width="18" height="24" rx="8"/><rect class="rg" x="102" y="106" width="16" height="24" rx="7"/>
+  <rect class="rg" x="103" y="128" width="14" height="24" rx="6"/><rect class="rg" x="104" y="150" width="12" height="28" rx="5"/>
+  <circle class="rg" cx="110" cy="52" r="16"/>
+  <circle class="rg" cx="100" cy="48" r="8"/><circle class="rg" cx="120" cy="48" r="8"/>
+  <circle class="dot" cx="100" cy="48" r="3"/><circle class="dot" cx="120" cy="48" r="3"/>
+  <path class="ln sm" d="M103 60 Q110 64 117 60"/>`},
+{id:"caterpillar",sample:["#4cc46a","#a8e05f","#4cc46a","#a8e05f","#4cc46a","#8fd07a","#ff8ec9","#ff8ec9"],svg:`
+  <path class="ln lg" d="M64 150 L58 168 M92 154 L88 172 M120 154 L118 172 M148 150 L152 168"/>
+  <circle class="rg" cx="168" cy="120" r="24"/><circle class="rg" cx="140" cy="126" r="22"/>
+  <circle class="rg" cx="114" cy="128" r="22"/><circle class="rg" cx="88" cy="128" r="22"/><circle class="rg" cx="64" cy="126" r="22"/>
+  <circle class="rg" cx="42" cy="118" r="26"/>
+  <path class="ln" d="M34 96 C 28 82 26 74 22 66 M46 94 C 44 78 46 70 44 62"/>
+  <circle class="dot" cx="22" cy="65" r="3.4"/><circle class="dot" cx="44" cy="61" r="3.4"/>
+  <circle class="dot" cx="34" cy="114" r="3.2"/><circle class="dot" cx="50" cy="114" r="3.2"/>
+  <path class="ln sm" d="M34 128 Q44 136 54 128"/>
+  <circle class="rg ck" cx="30" cy="128" r="5"/><circle class="rg ck" cx="56" cy="128" r="5"/>`},
+{id:"snail",sample:["#ffd0a6","#ffd0a6","#ff9f43","#ffd93d","#ff7a5b"],svg:`
+  <path class="rg" d="M40 168 C 36 150 44 140 66 138 L150 138 C 176 138 184 152 176 168 C 172 176 150 178 110 178 L60 178 C 48 178 42 174 40 168 Z"/>
+  <path class="rg" d="M150 138 C 154 116 168 108 182 110 C 196 112 198 128 190 140 C 184 150 168 150 150 146 Z"/>
+  <circle class="rg" cx="96" cy="110" r="46"/><circle class="rg" cx="102" cy="112" r="30"/><circle class="rg" cx="107" cy="114" r="15"/>
+  <path class="ln" d="M184 112 C 186 96 188 88 190 78 M176 116 C 174 100 172 92 168 82"/>
+  <circle class="dot" cx="190" cy="76" r="3.6"/><circle class="dot" cx="168" cy="81" r="3.6"/>
+  <circle class="dot" cx="184" cy="126" r="3"/><path class="ln sm" d="M176 134 Q184 138 190 133"/>`},
+{id:"beetle",sample:["#8a5a2b","#8a5a2b","#4a4a4a","#6a4a2b","#7a3b1b","#7a3b1b"],svg:`
+  <path class="ln lg" d="M78 118 L52 108 M76 140 L50 140 M80 162 L56 176 M142 118 L168 108 M144 140 L170 140 M140 162 L164 176"/>
+  <path class="rg" d="M92 44 C 78 30 70 20 72 40 C 74 54 84 58 96 58 Z"/>
+  <path class="rg" d="M128 44 C 142 30 150 20 148 40 C 146 54 136 58 124 58 Z"/>
+  <ellipse class="rg" cx="110" cy="60" rx="24" ry="18"/>
+  <ellipse class="rg" cx="110" cy="90" rx="30" ry="20"/>
+  <path class="rg" d="M110 104 C 78 104 66 130 70 156 C 74 178 92 190 110 190 Z"/>
+  <path class="rg" d="M110 104 C 142 104 154 130 150 156 C 146 178 128 190 110 190 Z"/>
+  <path class="ln" d="M110 106 L110 188"/>
+  <circle class="dot" cx="101" cy="60" r="3"/><circle class="dot" cx="119" cy="60" r="3"/>`},
+{id:"grasshopper",sample:["#7bc47b","#4cc46a","#8fd07a","#4a4a4a"],svg:`
+  <path class="ln lg" d="M120 118 C 150 120 168 150 172 182 M118 120 C 96 132 84 150 78 172"/>
+  <path class="rg" d="M96 108 C 120 90 168 96 180 128 C 168 150 128 150 104 132 Z"/>
+  <ellipse class="rg" cx="120" cy="120" rx="40" ry="24"/>
+  <ellipse class="rg" cx="72" cy="112" rx="22" ry="20"/>
+  <path class="ln" d="M60 100 C 48 84 40 74 30 64 M66 96 C 60 80 58 70 54 58"/>
+  <circle class="dot" cx="30" cy="63" r="3.4"/><circle class="dot" cx="54" cy="57" r="3.4"/>
+  <circle class="rg" cx="66" cy="106" r="7"/><circle class="dot" cx="66" cy="106" r="3"/>
+  <path class="ln sm" d="M56 118 Q64 123 74 119"/>
+  <path class="ln lg" d="M132 138 C 128 160 132 176 140 190"/>`},
+{id:"mantis",sample:["#a8e05f","#a8e05f","#8fd07a","#7bc47b","#6cbf4a","#6cbf4a","#6cbf4a","#ffd93d","#ffd93d"],svg:`
+  <path class="ln lg" d="M118 150 C 140 156 156 172 160 190 M116 168 C 132 176 144 186 150 196"/>
+  <ellipse class="rg" cx="94" cy="150" rx="16" ry="46" transform="rotate(-8 94 150)"/>
+  <ellipse class="rg" cx="126" cy="150" rx="16" ry="46" transform="rotate(8 126 150)"/>
+  <ellipse class="rg" cx="110" cy="158" rx="20" ry="44"/>
+  <rect class="rg" x="103" y="60" width="14" height="66" rx="7"/>
+  <path class="rg" d="M104 76 C 86 72 74 58 78 42 C 80 34 88 38 88 48 C 88 60 96 70 106 74 Z"/>
+  <path class="rg" d="M116 76 C 134 72 146 58 142 42 C 140 34 132 38 132 48 C 132 60 124 70 114 74 Z"/>
+  <path class="rg" d="M110 34 L130 60 Q110 68 90 60 Z"/>
+  <circle class="rg" cx="97" cy="52" r="7"/><circle class="rg" cx="123" cy="52" r="7"/>
+  <circle class="dot" cx="97" cy="52" r="2.6"/><circle class="dot" cx="123" cy="52" r="2.6"/>
+  <path class="ln" d="M104 36 C 100 26 98 22 96 16 M116 36 C 120 26 122 22 124 16"/>
+  <path class="ln sm" d="M102 62 Q110 66 118 62"/>`},
+{id:"rhinobeetle",sample:["#3a3a3a","#4a4a4a","#5a3a1b","#6a4a24","#6a4a24"],svg:`
+  <path class="ln lg" d="M80 96 L52 86 M78 120 L48 120 M82 150 L56 166 M140 96 L168 86 M142 120 L172 120 M138 150 L164 166"/>
+  <path class="rg" d="M104 50 C 100 30 96 16 92 8 C 90 3 97 2 100 11 C 103 20 106 30 110 36 C 114 30 117 20 120 11 C 123 2 130 3 128 8 C 124 16 120 30 116 50 Z"/>
+  <ellipse class="rg" cx="110" cy="58" rx="17" ry="13"/>
+  <ellipse class="rg" cx="110" cy="86" rx="32" ry="24"/>
+  <path class="rg" d="M110 104 C 78 104 66 132 70 160 C 74 184 92 196 110 196 Z"/>
+  <path class="rg" d="M110 104 C 142 104 154 132 150 160 C 146 184 128 196 110 196 Z"/>
+  <path class="ln" d="M110 106 L110 194"/>
+  <circle class="dot" cx="102" cy="58" r="2.6"/><circle class="dot" cx="118" cy="58" r="2.6"/>`},
+{id:"cicada",sample:["#d8eef2","#d8eef2","#6a8a4a","#4a6a2a","#5a7a3a","#c0642f","#c0642f"],svg:`
+  <ellipse class="rg" cx="78" cy="132" rx="20" ry="64" transform="rotate(-12 78 132)"/>
+  <ellipse class="rg" cx="142" cy="132" rx="20" ry="64" transform="rotate(12 142 132)"/>
+  <path class="rg" d="M92 96 L128 96 L118 176 Q110 187 102 176 Z"/>
+  <ellipse class="rg" cx="110" cy="86" rx="24" ry="22"/>
+  <ellipse class="rg" cx="110" cy="54" rx="24" ry="17"/>
+  <circle class="rg" cx="90" cy="52" r="8"/><circle class="rg" cx="130" cy="52" r="8"/>
+  <circle class="dot" cx="90" cy="52" r="3"/><circle class="dot" cx="130" cy="52" r="3"/>
+  <path class="ln sm" d="M101 60 Q110 65 119 60"/>
+  <path class="ln" d="M104 40 C 100 32 98 28 96 22 M116 40 C 120 32 122 28 124 22"/>`},
+{id:"flower",sample:["#4cc46a","#4cc46a","#ff8ec9","#ff8ec9","#ff8ec9","#ff8ec9","#ff8ec9","#ff8ec9","#ffd93d"],svg:`
+  <path class="ln st" d="M110 118 L110 196"/>
+  <path class="rg" d="M110 150 C 86 142 68 150 62 170 C 84 176 104 168 110 150 Z"/>
+  <path class="rg" d="M110 168 C 132 160 152 166 158 186 C 136 192 116 186 110 168 Z"/>
+  <ellipse class="rg" cx="110" cy="52" rx="18" ry="26"/><ellipse class="rg" cx="110" cy="108" rx="18" ry="26"/>
+  <ellipse class="rg" cx="66" cy="80" rx="26" ry="18"/><ellipse class="rg" cx="154" cy="80" rx="26" ry="18"/>
+  <ellipse class="rg" cx="76" cy="112" rx="24" ry="18" transform="rotate(-40 76 112)"/>
+  <ellipse class="rg" cx="144" cy="112" rx="24" ry="18" transform="rotate(40 144 112)"/>
+  <circle class="rg" cx="110" cy="80" r="24"/>
+  <circle class="dot" cx="101" cy="78" r="3"/><circle class="dot" cx="119" cy="78" r="3"/>
+  <path class="ln sm" d="M101 86 Q110 92 119 86"/>`},
+{id:"scorpion",sample:["#b06a2e","#b57534","#a5642a","#c08040","#c08040","#b57534","#a5642a","#8a4a1b","#9a5a24","#a5642a","#a5642a","#9a5a24","#9a5a24"],svg:`
+  <path class="ln lg" d="M92 84 L64 78 M94 98 L66 100 M96 112 L70 122 M100 126 L78 140 M128 84 L156 78 M126 98 L154 100 M124 112 L150 122 M120 126 L142 140"/>
+  <ellipse class="rg" cx="110" cy="104" rx="20" ry="16"/>
+  <ellipse class="rg" cx="110" cy="126" rx="17" ry="15"/>
+  <ellipse class="rg" cx="110" cy="146" rx="14" ry="13"/>
+  <circle class="rg" cx="116" cy="166" r="12"/>
+  <circle class="rg" cx="134" cy="178" r="11"/>
+  <circle class="rg" cx="154" cy="176" r="10"/>
+  <circle class="rg" cx="168" cy="162" r="9"/>
+  <path class="rg" d="M176 158 C 188 152 194 140 186 130 C 182 126 178 132 179 138 C 180 146 174 154 168 158 Z"/>
+  <ellipse class="rg" cx="110" cy="74" rx="26" ry="22"/>
+  <path class="rg" d="M92 62 C 80 54 70 50 62 46 C 56 43 58 52 64 56 C 72 61 84 66 92 70 Z"/>
+  <path class="rg" d="M128 62 C 140 54 150 50 158 46 C 164 43 162 52 156 56 C 148 61 136 66 128 70 Z"/>
+  <path class="rg" d="M62 48 C 48 40 36 44 38 58 C 40 70 54 72 60 64 C 55 62 50 56 53 50 C 56 46 60 48 60 53 Z"/>
+  <path class="rg" d="M158 48 C 172 40 184 44 182 58 C 180 70 166 72 160 64 C 165 62 170 56 167 50 C 164 46 160 48 160 53 Z"/>
+  <circle class="dot" cx="104" cy="70" r="2.6"/><circle class="dot" cx="116" cy="70" r="2.6"/>`},
+{id:"longhorn",sample:["#3a3a3a","#3a3a3a","#6a86a8","#6a86a8","#2a2a2a","#2a2a2a","#2a2a2a","#2a2a2a"],svg:`
+  <path class="ln lg" d="M100 44 C 84 30 70 20 58 8 C 52 3 48 6 54 12 C 66 24 80 34 96 46"/>
+  <path class="ln lg" d="M120 44 C 136 30 150 20 162 8 C 168 3 172 6 166 12 C 154 24 140 34 124 46"/>
+  <path class="ln lg" d="M78 110 L50 104 M80 140 L52 142 M82 168 L58 182 M142 110 L170 104 M140 140 L168 142 M138 168 L162 182"/>
+  <ellipse class="rg" cx="110" cy="56" rx="18" ry="15"/>
+  <ellipse class="rg" cx="110" cy="84" rx="26" ry="20"/>
+  <path class="rg" d="M110 100 C 76 100 64 130 68 162 C 72 188 92 200 110 200 Z"/>
+  <path class="rg" d="M110 100 C 144 100 156 130 152 162 C 148 188 128 200 110 200 Z"/>
+  <circle class="rg" cx="96" cy="126" r="9"/><circle class="rg" cx="124" cy="126" r="9"/>
+  <circle class="rg" cx="98" cy="164" r="8"/><circle class="rg" cx="122" cy="164" r="8"/>
+  <path class="ln" d="M110 102 L110 198"/>
+  <circle class="dot" cx="103" cy="56" r="2.6"/><circle class="dot" cx="117" cy="56" r="2.6"/>`}
+];
+
+function renderKeys(){
+  kb.innerHTML='';
+  const baseLow=60+octave*12;
+  [baseLow, baseLow+12].forEach(base=>{
+    const u=document.createElement('div'); u.className='oct-unit';
+    WHITES.forEach((w,i)=>{ const k=document.createElement('div'); k.className='key white'; k.dataset.midi=base+w[0]; k.dataset.name=w[1]; k.dataset.wi=i;
+      if(rainbow){ k.style.background='linear-gradient(180deg, rgba(255,255,255,.62), '+VIVID[i]+')'; k.style.color='#2a2a2a'; }
+      k.innerHTML='<span class="lbl">'+(labelOn?w[1]:'')+'</span>'; u.appendChild(k); });
+    BLACKS.forEach(([semi,nm,k])=>{ const bk=document.createElement('div'); bk.className='key black'; bk.dataset.midi=base+semi; bk.dataset.name=nm;
+      bk.style.left='calc('+((k+1)*12.5)+'% - 4%)';
+      bk.innerHTML='<span class="lbl">'+(labelOn?nm:'')+'</span>'; u.appendChild(bk); });
+    kb.appendChild(u);
+  });
+  if(starOn) applyGuide();
+}
+
+/* ===== 연주 ===== */
+const voices=new Map(), ptr={};
+function noteOn(el){ if(!el||voices.has(el)) return; ac(); const v=synth(+el.dataset.midi); voices.set(el,v||{}); el.classList.add('down'); floatNote(el); buzz(4); guideCheck(el); }
+function noteOff(el){ if(!el||!voices.has(el)) return; release(voices.get(el)); voices.delete(el); el.classList.remove('down'); }
+
+kb.addEventListener('pointerdown',e=>{ const k=e.target.closest('.key'); if(!k) return; e.preventDefault(); ptr[e.pointerId]=k; noteOn(k); });
+kb.addEventListener('pointermove',e=>{ if(!(e.pointerId in ptr)) return; const t=document.elementFromPoint(e.clientX,e.clientY); const k=t&&t.closest?t.closest('.key'):null;
+  if(k&&k!==ptr[e.pointerId]){ noteOff(ptr[e.pointerId]); ptr[e.pointerId]=k; noteOn(k); } });
+function up(e){ const k=ptr[e.pointerId]; if(k){ noteOff(k); delete ptr[e.pointerId]; } }
+kb.addEventListener('pointerup',up); kb.addEventListener('pointercancel',up);
+kb.addEventListener('pointerleave',e=>{ if(e.pointerId in ptr) up(e); });
+
+/* 컴퓨터 키보드 */
+const KEYMAP={a:['도',0],w:['도♯',0],s:['레',0],e:['레♯',0],d:['미',0],f:['파',0],t:['파♯',0],g:['솔',0],y:['솔♯',0],h:['라',0],u:['라♯',0],j:['시',0],k:['도',1]};
+const kdown={};
+window.addEventListener('keydown',e=>{ const m=KEYMAP[e.key]; if(!m||kdown[e.key]) return; kdown[e.key]=1;
+  const el=findKey(m[0],m[1]); if(el) noteOn(el); });
+window.addEventListener('keyup',e=>{ const m=KEYMAP[e.key]; if(!m) return; kdown[e.key]=0; const el=findKey(m[0],m[1]); if(el) noteOff(el); });
+function findKey(name,which){ const u=kb.querySelector('.oct-unit'); if(!u) return null; const list=[...u.querySelectorAll('.key')].filter(k=>k.dataset.name===name);
+  return which? list[list.length-1] : list[0]; }
+
+function applySample(svg,d){ const rs=svg.querySelectorAll('.rg'); (d.sample||[]).forEach((c,i)=>{ if(rs[i]) rs[i].setAttribute('fill',c); }); }
+function floatNote(el){ try{ const b=el.getBoundingClientRect(); const s=notes.getBoundingClientRect();
+  const d=INSECTS[Math.floor(Math.random()*INSECTS.length)];
+  const w=document.createElement('div'); w.className='pbug'; w.innerHTML='<svg viewBox="0 0 220 220">'+d.svg+'</svg>';
+  applySample(w.querySelector('svg'), d);
+  const size=44+Math.random()*12;
+  w.style.width=size+'px'; w.style.height=size+'px';
+  w.style.left=(b.left-s.left+b.width/2-size/2)+'px'; w.style.top=(b.top-s.top-size*0.5)+'px';
+  w.style.setProperty('--rot',(Math.random()*40-20)+'deg');
+  notes.appendChild(w); setTimeout(()=>w.remove(),1000); }catch(e){} }
+
+/* ===== 컨트롤 ===== */
+const octLbl=document.getElementById('octLbl');
+function setOct(d){ octave=Math.max(-2,Math.min(2,octave+d)); octLbl.textContent='옥타브 '+(4+octave)+'·'+(5+octave); renderKeys(); buzz(6); }
+document.getElementById('octDown').onclick=()=>setOct(-1);
+document.getElementById('octUp').onclick=()=>setOct(1);
+const labelBtn=document.getElementById('labelBtn');
+labelBtn.onclick=()=>{ labelOn=!labelOn; labelBtn.classList.toggle('on',labelOn); renderKeys(); buzz(6); };
+const rainbowBtn=document.getElementById('rainbowBtn');
+rainbowBtn.onclick=()=>{ rainbow=!rainbow; rainbowBtn.classList.toggle('on',rainbow); renderKeys(); buzz(6); };
+
+/* ===== 작은별 따라치기 ===== */
+const STAR=['도','도','솔','솔','라','라','솔','파','파','미','미','레','레','도',
+            '솔','솔','파','파','미','미','레','솔','솔','파','파','미','미','레',
+            '도','도','솔','솔','라','라','솔','파','파','미','미','레','레','도'];
+let starOn=false, gi=0;
+const starBtn=document.getElementById('starBtn');
+starBtn.onclick=()=>{ starOn=!starOn; gi=0; starBtn.classList.toggle('on',starOn); renderKeys(); buzz(6); };
+function applyGuide(){ [...kb.querySelectorAll('.key')].forEach(k=>k.classList.remove('guide'));
+  if(!starOn) return; const name=STAR[gi]; const el=[...kb.querySelectorAll('.key.white')].find(k=>k.dataset.name===name); if(el) el.classList.add('guide'); }
+function guideCheck(el){ if(!starOn) return; if(el.dataset.name===STAR[gi]){ gi=(gi+1)%STAR.length; applyGuide(); } }
+
+/* 규칙 */
+const rov=document.getElementById('rov');
+document.getElementById('rulesFab').onclick=()=>rov.classList.add('show');
+document.getElementById('rovClose').onclick=()=>rov.classList.remove('show');
+rov.onclick=e=>{ if(e.target===rov) rov.classList.remove('show'); };
+
+renderKeys();
+</script>
+
+<script id="framelink">
+(function(){
+  function caps(){ try{ parent.postMessage({type:'game-caps', tutorial:false, rules:!!document.getElementById('rulesFab')}, '*'); }catch(e){} }
+  window.addEventListener('message',function(e){ var d=e.data||{};
+    if(d.type==='ui-rules'){ var r=document.getElementById('rulesFab'); if(r) r.click(); } });
+  if(document.readyState!=='loading') caps(); else window.addEventListener('DOMContentLoaded',caps);
+  setTimeout(caps,150);
+})();
+</script>
+</body></html>
+</template>
+
   <script>
   (function(){
     "use strict";
@@ -13948,8 +14312,8 @@ setTimeout(()=>{resize();},200); setTimeout(()=>{resize();},600);
     function sendHap(){ try{ frame.contentWindow.postMessage({type:"haptics",on:hapOn},"*"); }catch(e){} }
     function wbuzz(ms){ if(!hapOn) return; try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
     renderHap();
-    const tplId={treasure:"tpl-treasure",skippity:"tpl-skippity",anthome:"tpl-anthome",qwirkle:"tpl-qwirkle",quoridor:"tpl-quoridor",hive:"tpl-hive",zertz:"tpl-zertz",quarto:"tpl-quarto",onitama:"tpl-onitama",kahuna:"tpl-kahuna",story:"tpl-story",pentago:"tpl-pentago",setg:"tpl-setg",dobble:"tpl-dobble",ricochet:"tpl-ricochet",rushhour:"tpl-rushhour",tantrix:"tpl-tantrix",ingenious:"tpl-ingenious",othello:"tpl-othello",pushpush:"tpl-pushpush",memory:"tpl-memory",maze:"tpl-maze",sticker:"tpl-sticker",coloring:"tpl-coloring",fireworks:"tpl-fireworks"};
-    const titles={treasure:"🐝 곤충 정원 보물찾기",skippity:"🦗 메뚜기 폴짝!",anthome:"🐜 개미집 가는 길",qwirkle:"🧩 곤충 쿼클",quoridor:"🪵 곤충 울타리 대결",hive:"🐝 곤충 하이브",zertz:"🦋 곤충 저르츠",quarto:"🐞 곤충 콰르토",onitama:"🐯 오니타마",kahuna:"🐝 곤충 카후나",story:"📖 곤충 이야기꾼",pentago:"🦋 곤충 펜타고",setg:"🔺 세트 · SET",dobble:"🔍 곤충 도블",ricochet:"🐛 애벌레 미끄럼",rushhour:"🐛 애벌레 러시아워",tantrix:"🔷 탄트릭스",ingenious:"🎯 인지니어스",othello:"⚫ 곤충 오델로",pushpush:"📦 원작 소코반",memory:"🧠 곤충 메모리",maze:"🌀 곤충 미로찾기",sticker:"🎨 스티커 놀이판",coloring:"🖍️ 곤충 색칠놀이",fireworks:"🎆 곤충 불꽃놀이"};
+    const tplId={treasure:"tpl-treasure",skippity:"tpl-skippity",anthome:"tpl-anthome",qwirkle:"tpl-qwirkle",quoridor:"tpl-quoridor",hive:"tpl-hive",zertz:"tpl-zertz",quarto:"tpl-quarto",onitama:"tpl-onitama",kahuna:"tpl-kahuna",story:"tpl-story",pentago:"tpl-pentago",setg:"tpl-setg",dobble:"tpl-dobble",ricochet:"tpl-ricochet",rushhour:"tpl-rushhour",tantrix:"tpl-tantrix",ingenious:"tpl-ingenious",othello:"tpl-othello",pushpush:"tpl-pushpush",memory:"tpl-memory",maze:"tpl-maze",sticker:"tpl-sticker",coloring:"tpl-coloring",fireworks:"tpl-fireworks",piano:"tpl-piano"};
+    const titles={treasure:"🐝 곤충 정원 보물찾기",skippity:"🦗 메뚜기 폴짝!",anthome:"🐜 개미집 가는 길",qwirkle:"🧩 곤충 쿼클",quoridor:"🪵 곤충 울타리 대결",hive:"🐝 곤충 하이브",zertz:"🦋 곤충 저르츠",quarto:"🐞 곤충 콰르토",onitama:"🐯 오니타마",kahuna:"🐝 곤충 카후나",story:"📖 곤충 이야기꾼",pentago:"🦋 곤충 펜타고",setg:"🔺 세트 · SET",dobble:"🔍 곤충 도블",ricochet:"🐛 애벌레 미끄럼",rushhour:"🐛 애벌레 러시아워",tantrix:"🔷 탄트릭스",ingenious:"🎯 인지니어스",othello:"⚫ 곤충 오델로",pushpush:"📦 원작 소코반",memory:"🧠 곤충 메모리",maze:"🌀 곤충 미로찾기",sticker:"🎨 스티커 놀이판",coloring:"🖍️ 곤충 색칠놀이",fireworks:"🎆 곤충 불꽃놀이",piano:"🎹 곤충 피아노"};
 
     function openGame(id){
       const tpl=document.getElementById(tplId[id]);
