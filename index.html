@@ -13972,8 +13972,8 @@ setTimeout(()=>{resize();},200); setTimeout(()=>{resize();},600);
   @keyframes pfloat{0%{opacity:1;transform:translateY(0) scale(.8);}100%{opacity:0;transform:translateY(-70px) scale(1.3);}}
 
   .kb{position:relative;height:min(64vh,540px);display:flex;flex-direction:column;gap:10px;padding:0 6px 12px;touch-action:none;}
-  .oct-unit{position:relative;flex:1;min-height:0;display:flex;}
-  @media (min-width:760px){ .kb{flex-direction:row;gap:14px;} }
+  .oct-unit{position:relative;flex:1 1 0;min-height:0;display:flex;}
+  @media (min-width:760px){ .kb{flex-direction:row;gap:14px;} .oct-unit{flex-grow:var(--wc,1);} }
   .key{position:relative;cursor:pointer;}
   .key.white{flex:1;margin:0 1px;background:linear-gradient(#ffffff,#f0f0f0);border:1px solid #cececd;border-top:none;
     border-radius:0 0 10px 10px;box-shadow:inset 0 -7px 0 rgba(0,0,0,.06),0 3px 4px rgba(0,0,0,.18);
@@ -14055,6 +14055,7 @@ const kb=document.getElementById('kb'), notes=document.getElementById('notes');
 let octave=0;            // C4 기준
 let labelOn=true, rainbow=false;
 const WHITES=[[0,'도'],[2,'레'],[4,'미'],[5,'파'],[7,'솔'],[9,'라'],[11,'시'],[12,'도']];
+const WHITES_LOW=[[0,'도'],[2,'레'],[4,'미'],[5,'파'],[7,'솔'],[9,'라'],[11,'시']];
 const BLACKS=[[1,'도♯',0],[3,'레♯',1],[6,'파♯',3],[8,'솔♯',4],[10,'라♯',5]];
 const VIVID=['#ff3b3b','#ff8a1e','#ffd000','#22c24e','#12c0ae','#2aa3ff','#5b6cff','#c94bf0'];
 const INSECTS=[
@@ -14206,19 +14207,22 @@ const INSECTS=[
   <circle class="dot" cx="103" cy="56" r="2.6"/><circle class="dot" cx="117" cy="56" r="2.6"/>`}
 ];
 
+function buildUnit(base, whites){
+  const u=document.createElement('div'); u.className='oct-unit';
+  const count=whites.length; u.style.setProperty('--wc',count); const ww=100/count;
+  whites.forEach((w,i)=>{ const k=document.createElement('div'); k.className='key white'; k.dataset.midi=base+w[0]; k.dataset.name=w[1]; k.dataset.wi=i;
+    if(rainbow){ k.style.background='linear-gradient(180deg, rgba(255,255,255,.62), '+VIVID[i%VIVID.length]+')'; k.style.color='#2a2a2a'; }
+    k.innerHTML='<span class="lbl">'+(labelOn?w[1]:'')+'</span>'; u.appendChild(k); });
+  BLACKS.forEach(([semi,nm,kk])=>{ if(kk>count-2) return; const bk=document.createElement('div'); bk.className='key black'; bk.dataset.midi=base+semi; bk.dataset.name=nm;
+    bk.style.width=(ww*0.62)+'%'; bk.style.left='calc('+((kk+1)*ww)+'% - '+(ww*0.31)+'%)';
+    bk.innerHTML='<span class="lbl">'+(labelOn?nm:'')+'</span>'; u.appendChild(bk); });
+  kb.appendChild(u);
+}
 function renderKeys(){
   kb.innerHTML='';
-  const baseLow=60+octave*12;
-  [baseLow, baseLow+12].forEach(base=>{
-    const u=document.createElement('div'); u.className='oct-unit';
-    WHITES.forEach((w,i)=>{ const k=document.createElement('div'); k.className='key white'; k.dataset.midi=base+w[0]; k.dataset.name=w[1]; k.dataset.wi=i;
-      if(rainbow){ k.style.background='linear-gradient(180deg, rgba(255,255,255,.62), '+VIVID[i]+')'; k.style.color='#2a2a2a'; }
-      k.innerHTML='<span class="lbl">'+(labelOn?w[1]:'')+'</span>'; u.appendChild(k); });
-    BLACKS.forEach(([semi,nm,k])=>{ const bk=document.createElement('div'); bk.className='key black'; bk.dataset.midi=base+semi; bk.dataset.name=nm;
-      bk.style.left='calc('+((k+1)*12.5)+'% - 4%)';
-      bk.innerHTML='<span class="lbl">'+(labelOn?nm:'')+'</span>'; u.appendChild(bk); });
-    kb.appendChild(u);
-  });
+  const base=60+octave*12;
+  buildUnit(base, WHITES_LOW);   // 낮은 옥타브: 도~시 (끝의 도 제거)
+  buildUnit(base+12, WHITES);    // 높은 옥타브: 도~높은도
   if(starOn) applyGuide();
 }
 
@@ -14240,8 +14244,7 @@ const kdown={};
 window.addEventListener('keydown',e=>{ const m=KEYMAP[e.key]; if(!m||kdown[e.key]) return; kdown[e.key]=1;
   const el=findKey(m[0],m[1]); if(el) noteOn(el); });
 window.addEventListener('keyup',e=>{ const m=KEYMAP[e.key]; if(!m) return; kdown[e.key]=0; const el=findKey(m[0],m[1]); if(el) noteOff(el); });
-function findKey(name,which){ const u=kb.querySelector('.oct-unit'); if(!u) return null; const list=[...u.querySelectorAll('.key')].filter(k=>k.dataset.name===name);
-  return which? list[list.length-1] : list[0]; }
+function findKey(name,u){ const units=kb.querySelectorAll('.oct-unit'); const unit=units[u]||units[0]; if(!unit) return null; const list=[...unit.querySelectorAll('.key')].filter(k=>k.dataset.name===name); return list[0]||null; }
 
 function applySample(svg,d){ const rs=svg.querySelectorAll('.rg'); (d.sample||[]).forEach((c,i)=>{ if(rs[i]) rs[i].setAttribute('fill',c); }); }
 function floatNote(el){ try{ const b=el.getBoundingClientRect(); const s=notes.getBoundingClientRect();
